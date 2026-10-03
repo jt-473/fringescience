@@ -118,7 +118,6 @@
   .type-live { position: absolute; inset: 0; transition: text-shadow 0.3s var(--ease), transform 0.3s var(--ease); }
   .type:hover .type-live { transform: translate(-3px, -3px); text-shadow: 3px 3px 0 rgba(255, 201, 107, 0.35), 6px 6px 0 rgba(157, 183, 255, 0.18); }
   .caret { display: inline-block; width: 0.42em; height: 0.82em; margin-left: 0.08em; vertical-align: -0.06em; background: var(--lamp); animation: caret 1s steps(1) infinite; box-shadow: 0 0 18px rgba(255, 201, 107, 0.55); }
-  .type.typing .caret { animation: none; }
   @keyframes caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
   .hero-sub { margin-top: 22px; max-width: 46ch; color: var(--muted); font-size: clamp(16px, 1.3vw, 18px); }
   .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
@@ -440,9 +439,9 @@
     <div class="motes" id="motes" aria-hidden="true"></div>
     <div class="scan" aria-hidden="true"></div>
     <div class="wrap hero-content">
-      <h1 class="type typing" id="heroType" aria-label="Late-night science, off the usual path.">
+      <h1 class="type" id="heroType" aria-label="Late-night science, off the usual path.">
         <span class="type-ghost" aria-hidden="true">Late-night science, <em>off the usual path.</em><span class="caret"></span></span>
-        <span class="type-live" aria-hidden="true"><span id="typeA"></span><em id="typeB"></em><span class="caret"></span></span>
+        <span class="type-live" aria-hidden="true">Late-night science, <em>off the usual path.</em><span class="caret"></span></span>
       </h1>
       <p class="hero-sub" data-stagger="2">Track genomics, mycology, clinical research and health-data internships across the UK, then rehearse the interview out loud.</p>
       <div class="hero-ctas">
@@ -1263,23 +1262,9 @@
     if (name === "dashboard") { prevStats = prevStats.map(() => 0); countStats(); }
   }
 
-  // Hero typing.
-  const heroType = $("#heroType"), hero = $(".hero");
-  const PART_A = "Late-night science, ", PART_B = "off the usual path.";
-  function finishTyping() { heroType.classList.remove("typing"); hero.classList.add("typed"); }
-  if (reduceMotion) { $("#typeA").textContent = PART_A; $("#typeB").textContent = PART_B; finishTyping(); }
-  else {
-    const full = PART_A + PART_B; let n = 0;
-    const typeNext = () => {
-      n++;
-      $("#typeA").textContent = full.slice(0, Math.min(n, PART_A.length));
-      $("#typeB").textContent = n > PART_A.length ? full.slice(PART_A.length, n) : "";
-      if (n >= full.length) return setTimeout(finishTyping, 250);
-      const ch = full[n - 1];
-      setTimeout(typeNext, ch === "," ? 380 : ch === " " ? 90 : 45 + Math.random() * 55);
-    };
-    setTimeout(typeNext, 900);
-  }
+  // Hero headline (static) with a blinking cursor; reveal subtext and CTAs shortly after load.
+  const hero = $(".hero");
+  setTimeout(() => hero.classList.add("typed"), reduceMotion ? 0 : 500);
 
   // Floating pixel motes.
   if (!reduceMotion) {
