@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
   // Apply the saved theme before first paint to avoid a flash.
   try { document.documentElement.dataset.theme = localStorage.getItem("fringescience.theme") === "light" ? "light" : "dark"; } catch (e) { document.documentElement.dataset.theme = "dark"; }
@@ -234,7 +235,7 @@
   .tabs::-webkit-scrollbar { display: none; }
   .tab {
     flex: 1 0 auto; display: flex; align-items: center; justify-content: center; gap: 10px;
-    padding: 18px 22px; background: none; border: 0; border-right: 1px solid var(--line);
+    padding: 18px 16px; background: none; border: 0; border-right: 1px solid var(--line);
     color: var(--dim); font-family: var(--display); font-size: 16px; cursor: pointer; position: relative;
     transition: color 0.2s, background 0.2s;
   }
@@ -384,6 +385,53 @@
   .profile-note { font-size: 12.5px; color: var(--dim); display: flex; gap: 6px; align-items: flex-start; }
   .profile-note i { margin-top: 2px; }
   @media (max-width: 860px) { .prep-head { grid-template-columns: 1fr; } }
+
+  /* Applications-by-status chart */
+  .status-chart { border: 1px solid var(--line); background: var(--surface); padding: 22px 24px; margin-bottom: 40px; }
+  .status-chart .panel-title { margin-bottom: 14px; }
+  .sc-body { display: grid; grid-template-columns: 240px 1fr; gap: 36px; align-items: center; }
+  .sc-canvas { position: relative; width: 240px; height: 240px; }
+  .sc-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
+  .sc-total { font-family: var(--display); font-size: 44px; font-weight: 600; line-height: 1; color: var(--text); }
+  .sc-total-label { font-size: 13px; color: var(--dim); margin-top: 4px; }
+  .sc-legend { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .sc-legend td { padding: 11px 8px; border-bottom: 1px solid var(--line); }
+  .sc-legend tr:last-child td { border-bottom: 0; }
+  .sc-legend .sw { width: 14px; height: 14px; display: inline-block; vertical-align: -2px; margin-right: 10px; border-radius: 3px; }
+  .sc-legend .n { font-family: var(--display); font-weight: 600; text-align: right; color: var(--text); }
+  .sc-legend .pct { text-align: right; color: var(--dim); width: 60px; }
+  .sc-legend tr { transition: background 0.2s; }
+  .sc-legend tr.hl { background: var(--lamp-soft); }
+  @media (max-width: 760px) { .sc-body { grid-template-columns: 1fr; justify-items: center; gap: 20px; } }
+
+  /* CV check */
+  .cv-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items: start; }
+  @media (max-width: 900px) { .cv-grid { grid-template-columns: 1fr; } }
+  .cv-form .field { max-width: none; margin-bottom: 16px; }
+  .cv-text { width: 100%; resize: vertical; min-height: 280px; padding: 14px 16px; background: var(--bg); border: 1px solid var(--line-strong); border-radius: 0; color: var(--text); line-height: 1.55; font-size: 14.5px; }
+  .cv-text:focus { outline: none; border-color: var(--lamp); box-shadow: 0 0 0 3px var(--lamp-soft); }
+  .cv-text::placeholder { color: var(--dim); }
+  .cv-result { border: 1px solid var(--line-strong); background: var(--surface); min-height: 340px; padding: 24px; display: grid; gap: 18px; align-content: start; }
+  .cv-placeholder { text-align: center; color: var(--dim); padding: 60px 20px; font-size: 14.5px; }
+  .cv-placeholder i { font-size: 36px; color: var(--moon); display: block; margin-bottom: 12px; }
+  .cv-verdict { display: flex; gap: 14px; align-items: flex-start; animation: rise 0.5s var(--ease) both; }
+  .cv-verdict .cv-icon { width: 46px; height: 46px; flex-shrink: 0; display: grid; place-items: center; font-size: 24px; }
+  .cv-verdict.good .cv-icon { background: var(--lamp); color: var(--lamp-ink); }
+  .cv-verdict.weak .cv-icon { background: var(--surface-2); color: var(--lamp-text); border: 1px solid var(--line-strong); }
+  .cv-verdict h4 { font-size: 22px; margin-bottom: 4px; }
+  .cv-verdict p { color: var(--muted); font-size: 14.5px; }
+  .cv-score { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--dim); font-weight: 600; }
+  .cv-meter { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+  .cv-meter span { height: 8px; background: var(--surface-2); }
+  .cv-meter span.on { background: var(--lamp); }
+  .cv-block { display: grid; gap: 10px; }
+  .cv-block .profile-label { font-size: 12.5px; }
+  .cv-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cv-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 5px 11px; border: 1px solid; animation: stIn 0.4s var(--ease) both; }
+  .cv-chip.found { color: var(--lamp-text); border-color: rgba(255, 201, 107, 0.4); background: var(--lamp-soft); }
+  .cv-chip.missing { color: var(--muted); border-color: var(--line-strong); border-style: dashed; }
+  .cv-note { font-size: 13px; color: var(--dim); display: flex; gap: 8px; }
+  .cv-note i { margin-top: 2px; }
 
   /* Interview prep */
   .qa-grid { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 40px; }
@@ -573,11 +621,30 @@
           <button class="tab" role="tab" id="tab-applications" aria-controls="panel-applications" aria-selected="false" data-tab="applications" tabindex="-1"><i class="ph ph-paper-plane-tilt"></i> Applications <span class="count" id="countApps">0</span></button>
           <span class="tab-ink" id="tabInk" aria-hidden="true"></span>
           <button class="tab" role="tab" id="tab-prep" aria-controls="panel-prep" aria-selected="false" data-tab="prep" tabindex="-1"><i class="ph ph-microphone-stage"></i> Interview prep</button>
+          <button class="tab" role="tab" id="tab-cv" aria-controls="panel-cv" aria-selected="false" data-tab="cv" tabindex="-1"><i class="ph ph-file-text"></i> CV check</button>
         </div>
 
         <!-- DASHBOARD -->
         <div class="panel" role="tabpanel" id="panel-dashboard" aria-labelledby="tab-dashboard">
           <div class="stats" id="stats"></div>
+          <div class="status-chart" id="statusChart">
+            <div class="sc-head">
+              <h3 class="panel-title"><span class="hx">Applications by status</span> <small>Updates live from your Applications tab</small></h3>
+            </div>
+            <div class="sc-body">
+              <div class="sc-canvas">
+                <canvas id="statusCanvas" role="img" aria-label="Doughnut chart of applications by status"></canvas>
+                <div class="sc-center" aria-hidden="true"><span class="sc-total" id="scTotal">0</span><span class="sc-total-label">tracked</span></div>
+              </div>
+              <table class="sc-legend" aria-label="Applications by status">
+                <tbody id="scLegend"></tbody>
+              </table>
+            </div>
+            <div class="empty sc-empty" id="scEmpty" hidden>
+              <h4>No applications yet</h4>
+              <p>Track a program from the Internships tab and it shows up here.</p>
+            </div>
+          </div>
           <h3 class="panel-title"><span class="hx" data-scramble>Upcoming deadlines</span> <small>Next application cycle</small></h3>
           <table class="table">
             <thead><tr><th>Program</th><th>Focus</th><th>Pay</th><th>Deadline</th><th>Your status</th></tr></thead>
@@ -732,6 +799,31 @@
                   </div>
                 </details>
                 <p class="privacy"><i class="ph ph-lock-simple"></i> Expression reading runs on your device. Transcription uses your browser's speech service. With an ElevenLabs key, question text is sent to ElevenLabs to generate the voice.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CV CHECK -->
+        <div class="panel" role="tabpanel" id="panel-cv" aria-labelledby="tab-cv" hidden>
+          <div class="cv-grid">
+            <form class="cv-form" id="cvForm">
+              <h3 class="panel-title"><span class="hx">Check your CV</span></h3>
+              <div class="field">
+                <label for="cvText">Paste your CV text</label>
+                <textarea id="cvText" class="cv-text" rows="14" placeholder="Paste your skills, experience and projects here"></textarea>
+                <span class="help">Recruiters for lab roles skim for named techniques. This checks which ones your CV mentions. Nothing is uploaded.</span>
+                <span class="help warn" id="cvError" hidden><i class="ph ph-warning"></i> Paste some CV text first.</span>
+              </div>
+              <div class="voice-controls">
+                <button class="btn btn-primary" type="submit"><i class="ph ph-magnifying-glass"></i> Check my CV</button>
+                <button class="btn btn-ghost" type="button" id="cvClear">Clear</button>
+              </div>
+            </form>
+            <div class="cv-result" id="cvResult" aria-live="polite">
+              <div class="cv-placeholder">
+                <i class="ph ph-file-magnifying-glass"></i>
+                <p>Your results show up here: which lab techniques recruiters will spot, and which are missing.</p>
               </div>
             </div>
           </div>
@@ -989,7 +1081,74 @@
       </div>`).join("");
     $("#countApps").textContent = tracked;
     countStats();
+    renderStatusChart();
   }
+
+  /* ---- Applications-by-status doughnut (live from state.apps) ---- */
+  // Ordinal amber ramps, one per theme; both validated for monotone lightness and contrast against the surface.
+  var STATUS_RAMP = { dark: ["#5e4519", "#9c6f22", "#d99a2e", "#ffc96b"], light: ["#d9a74c", "#b87a14", "#8c5800", "#5a3600"] };
+  var statusChartObj = null;
+  function chartTheme() {
+    const css = getComputedStyle($("#statusChart"));
+    const v = n => css.getPropertyValue(n).trim();
+    return { ramp: STATUS_RAMP[document.documentElement.dataset.theme === "light" ? "light" : "dark"], surface: v("--surface"), surface2: v("--surface-2"), text: v("--text"), muted: v("--muted"), line: v("--line-strong") };
+  }
+  function renderStatusChart() {
+    const counts = STAGES.map(st => state.apps.filter(a => a.s === st.key).length);
+    const total = counts.reduce((a, b) => a + b, 0);
+    const t = chartTheme();
+    $("#scTotal").textContent = total;
+    $("#scEmpty").hidden = total > 0;
+    $(".sc-body").hidden = total === 0;
+    $("#scLegend").innerHTML = STAGES.map((st, i) => `
+      <tr data-i="${i}">
+        <td><span class="sw" style="background:${t.ramp[i]}"></span>${st.label}</td>
+        <td class="n">${counts[i]}</td>
+        <td class="pct">${total ? Math.round(counts[i] / total * 100) : 0}%</td>
+      </tr>`).join("");
+    if (typeof Chart === "undefined") { $(".sc-canvas").hidden = true; return; }
+    if (statusChartObj) {
+      const ds = statusChartObj.data.datasets[0];
+      ds.data = counts; ds.backgroundColor = t.ramp; ds.hoverBackgroundColor = t.ramp; ds.borderColor = t.surface;
+      Object.assign(statusChartObj.options.plugins.tooltip, { backgroundColor: t.surface2, titleColor: t.text, bodyColor: t.muted, borderColor: t.line });
+      statusChartObj.update();
+      return;
+    }
+    statusChartObj = new Chart($("#statusCanvas"), {
+      type: "doughnut",
+      data: { labels: STAGES.map(s => s.label), datasets: [{ data: counts, backgroundColor: t.ramp, hoverBackgroundColor: t.ramp, borderColor: t.surface, borderWidth: 2, borderRadius: 4, hoverOffset: 6 }] },
+      options: {
+        cutout: "70%", responsive: true, maintainAspectRatio: false,
+        animation: { animateRotate: true, duration: reduceMotion ? 0 : 900, easing: "easeOutQuart" },
+        layout: { padding: 8 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: t.surface2, titleColor: t.text, bodyColor: t.muted, borderColor: t.line, borderWidth: 1,
+            cornerRadius: 0, padding: 10, displayColors: false,
+            titleFont: { family: "IBM Plex Mono", weight: "600" }, bodyFont: { family: "Montserrat" },
+            callbacks: { label: c => { const sum = c.dataset.data.reduce((a, b) => a + b, 0); return `${c.parsed} of ${sum} (${sum ? Math.round(c.parsed / sum * 100) : 0}%)`; } }
+          }
+        },
+        onHover: (e, els) => document.querySelectorAll("#scLegend tr").forEach((r, i) => r.classList.toggle("hl", !!els.length && els[0].index === i))
+      }
+    });
+  }
+  // Hovering a legend row highlights its slice.
+  $("#scLegend").addEventListener("mouseover", e => {
+    const r = e.target.closest("tr"); if (!r || !statusChartObj) return;
+    const i = +r.dataset.i;
+    if (!statusChartObj.data.datasets[0].data[i]) return;
+    statusChartObj.setActiveElements([{ datasetIndex: 0, index: i }]);
+    statusChartObj.tooltip.setActiveElements([{ datasetIndex: 0, index: i }], { x: 0, y: 0 });
+    statusChartObj.update();
+  });
+  $("#scLegend").addEventListener("mouseleave", () => {
+    if (!statusChartObj) return;
+    statusChartObj.setActiveElements([]); statusChartObj.tooltip.setActiveElements([], { x: 0, y: 0 }); statusChartObj.update();
+  });
+  // Recolour when the theme changes.
+  new MutationObserver(() => renderStatusChart()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   function statusCell(id) {
     const a = appFor(id);
     return a ? `<span class="badge static" data-s="${a.s}">${stageLabel(a.s)}</span>` : `<span class="tag">Not tracked</span>`;
@@ -1095,6 +1254,64 @@
 
   function renderAll() { renderStats(); renderDeadlines(); renderPrograms(); renderApps(); }
   renderAll();
+
+  /* ================= CV CHECK ================= */
+  const CV_TECHNIQUES = [
+    { name: "PCR", re: /\b(?:q|rt-?q?|rt-|real-time\s+)?pcr\b/i },
+    { name: "ELISA", re: /\belisas?\b/i },
+    { name: "Western blot", re: /\bwestern\s*-?\s*blot(?:s|ting)?\b/i },
+    { name: "Gel electrophoresis", re: /\b(?:gel\s+electrophoresis|agarose\s+gels?|sds-?page)\b/i },
+    { name: "Pipetting", re: /\bpipet(?:te|tes|ting|ted|ing)?\b/i },
+    { name: "GC-MS", re: /\bgc\s*[-\/]?\s*ms\b/i },
+    { name: "Sequencing", re: /\b(?:sequencing|sequenced|ngs|sanger\s+sequencing|rna-?seq)\b/i },
+    { name: "Microscopy", re: /\bmicroscop(?:y|e|es|ic)\b/i },
+    { name: "Cell culture", re: /\b(?:cell|tissue)\s+cultur(?:e|es|ing)\b/i },
+    { name: "Bioinformatics", re: /\bbioinformatic(?:s|al)?\b/i },
+    { name: "Statistics", re: /\b(?:statistics|statistical|spss|anova|t-tests?|regression)\b/i },
+    { name: "Lab", re: /\b(?:lab|labs|laboratory|laboratories)\b/i }
+  ];
+  const CV_GOOD = 4;
+  function checkCv(text) {
+    const found = CV_TECHNIQUES.filter(t => t.re.test(text)).map(t => t.name);
+    const missing = CV_TECHNIQUES.map(t => t.name).filter(n => !found.includes(n));
+    return { found, missing, good: found.length >= CV_GOOD };
+  }
+  function renderCv(r) {
+    const meter = CV_TECHNIQUES.map((_, i) => `<span class="${i < r.found.length ? "on" : ""}"></span>`).join("");
+    const chips = (list, cls) => list.map((n, i) => `<span class="cv-chip ${cls}" style="animation-delay:${i * 40}ms">${cls === "found" ? '<i class="ph ph-check"></i>' : '<i class="ph ph-plus"></i>'}${esc(n)}</span>`).join("");
+    $("#cvResult").innerHTML = `
+      <div class="cv-verdict ${r.good ? "good" : "weak"}">
+        <span class="cv-icon"><i class="ph ${r.good ? "ph-seal-check" : "ph-warning"}"></i></span>
+        <div>
+          <h4>${r.good ? "Great CV!" : "Add more specific techniques"}</h4>
+          <p>${r.good
+            ? `Your CV names ${r.found.length} lab techniques recruiters look for. Keep each one tied to a project or result.`
+            : `Only ${r.found.length} of the techniques recruiters skim for ${r.found.length === 1 ? "was" : "were"} found. Name the methods you've actually used, with where you used them.`}</p>
+        </div>
+      </div>
+      <div class="cv-score"><span>${r.found.length} / ${CV_TECHNIQUES.length}</span><div class="cv-meter" aria-hidden="true">${meter}</div></div>
+      <div class="cv-block">
+        <span class="profile-label">Techniques found</span>
+        ${r.found.length ? `<div class="cv-chips">${chips(r.found, "found")}</div>` : `<p class="help">None</p>`}
+      </div>
+      ${r.missing.length ? `<div class="cv-block">
+        <span class="profile-label">Not mentioned</span>
+        <div class="cv-chips">${chips(r.missing, "missing")}</div>
+      </div>` : ""}
+      <p class="cv-note"><i class="ph ph-info"></i> Only add techniques you've genuinely used. Interviewers will ask about them.</p>`;
+  }
+  $("#cvForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const text = $("#cvText").value.trim();
+    $("#cvError").hidden = !!text;
+    if (!text) { $("#cvText").focus(); return; }
+    renderCv(checkCv(text));
+  });
+  $("#cvText").addEventListener("input", () => { if ($("#cvText").value.trim()) $("#cvError").hidden = true; });
+  $("#cvClear").addEventListener("click", () => {
+    $("#cvText").value = ""; $("#cvError").hidden = true;
+    $("#cvResult").innerHTML = `<div class="cv-placeholder"><i class="ph ph-file-magnifying-glass"></i><p>Your results show up here: which lab techniques recruiters will spot, and which are missing.</p></div>`;
+  });
 
   /* ================= TAILORED PREP ================= */
   // QA, COACH_QS and KEYWORDS are swapped in place so the coach and mock interview pick up the new role without changes.
@@ -1687,7 +1904,7 @@
   function revealStats() { statsSeen = true; prevStats = prevStats.map(() => 0); countStats(); }
 
   // Staggered entrance for list-like children.
-  const GROUPS = { dashboard: ["#stats", "#deadlineRows"], internships: ["#programRows"], applications: ["#appRows"], prep: ["#qaGrid", ".practice"] };
+  const GROUPS = { dashboard: ["#stats", "#scLegend", "#deadlineRows"], internships: ["#programRows"], applications: ["#appRows"], prep: ["#qaGrid", ".practice"], cv: [".cv-grid"] };
   function staggerIn(name) {
     if (reduceMotion) return;
     (GROUPS[name] || []).forEach(sel => {
