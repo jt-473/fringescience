@@ -254,7 +254,7 @@
   @media (max-width: 980px) { .qa-grid { grid-template-columns: 1fr 1fr; } .qa:first-child { grid-row: auto; grid-column: 1 / -1; } }
   @media (max-width: 600px) { .qa-grid { grid-template-columns: 1fr; } }
 
-  .practice { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .practice { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
   @media (max-width: 980px) { .practice { grid-template-columns: 1fr; } }
   .card { border: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; min-height: 560px; }
   .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
@@ -299,6 +299,28 @@
   .chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; background: rgba(5, 7, 15, 0.78); border: 1px solid var(--line-strong); font-size: 12.5px; font-weight: 600; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .chip.rec::before { content: ""; width: 8px; height: 8px; background: #ff6b6b; animation: blink 1.2s infinite; }
   .chip .ex { font-family: var(--pixel); font-size: 14px; color: var(--lamp); }
+  .interviewer { border: 1px solid var(--line-strong); background: radial-gradient(120% 120% at 100% 0%, rgba(157, 183, 255, 0.12), transparent 60%), var(--surface-2); padding: 16px 18px; display: grid; gap: 12px; }
+  .iv-top { display: flex; align-items: center; gap: 12px; }
+  .iv-avatar { width: 40px; height: 40px; display: grid; place-items: center; background: var(--bg); border: 1px solid var(--line-strong); color: var(--moon); font-size: 22px; }
+  .iv-name { font-family: var(--pixel); font-size: 16px; line-height: 1.2; }
+  .iv-state { font-size: 12.5px; color: var(--dim); font-weight: 600; }
+  .iv-top .icon-btn { flex-shrink: 0; }
+  .iv-q { font-family: var(--pixel); font-size: 19px; line-height: 1.35; min-height: 52px; }
+  .eq { margin-left: auto; display: flex; align-items: flex-end; gap: 3px; height: 20px; opacity: 0.25; transition: opacity 0.3s; }
+  .eq span { width: 4px; height: 6px; background: var(--lamp); }
+  .interviewer.speaking .eq { opacity: 1; }
+  .interviewer.speaking .eq span { animation: eq 0.8s ease-in-out infinite; }
+  .interviewer.speaking .eq span:nth-child(2) { animation-delay: 0.15s; }
+  .interviewer.speaking .eq span:nth-child(3) { animation-delay: 0.3s; }
+  .interviewer.speaking .eq span:nth-child(4) { animation-delay: 0.45s; }
+  .interviewer.speaking .iv-state { color: var(--lamp); }
+  @keyframes eq { 0%, 100% { height: 5px; } 50% { height: 20px; } }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-rec { background: var(--bg); color: var(--text); border-color: #ff6b6b; }
+  .btn-rec i { color: #ff6b6b; }
+  .summary { display: grid; gap: 8px; }
+  .summary-row { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; font-size: 13.5px; color: var(--muted); padding: 8px 0; border-top: 1px solid var(--line); }
+  .summary-row b { font-family: var(--pixel); color: var(--lamp); font-weight: 500; }
   .voice-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .transcript { min-height: 72px; padding: 12px 14px; background: var(--bg); border: 1px solid var(--line); font-size: 14.5px; color: var(--text); }
   .transcript.placeholder { color: var(--dim); }
@@ -448,35 +470,45 @@
               </form>
             </div>
 
-            <!-- Voice -->
+            <!-- AI mock interview -->
             <div class="card">
               <div class="card-head">
-                <h3><i class="ph ph-microphone"></i> Voice practice</h3>
-                <span class="progress" id="voiceTimer">00:00</span>
+                <h3><i class="ph ph-user-sound"></i> AI mock interview</h3>
+                <span class="progress" id="mockProgress">5 questions</span>
               </div>
               <div class="voice-body">
-                <div class="field" style="margin:0;max-width:none">
-                  <label class="voice-q-label" for="voiceQ">Question to answer</label>
-                  <select id="voiceQ" class="select"></select>
+                <div class="interviewer" id="interviewer">
+                  <div class="iv-top">
+                    <span class="iv-avatar" aria-hidden="true"><i class="ph ph-robot"></i></span>
+                    <div>
+                      <div class="iv-name">Interviewer</div>
+                      <div class="iv-state" id="ivState">Ready when you are</div>
+                    </div>
+                    <span class="eq" id="ivEq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+                    <button class="icon-btn" id="repeatBtn" type="button" hidden aria-label="Repeat the question" title="Repeat the question"><i class="ph ph-speaker-high"></i></button>
+                  </div>
+                  <p class="iv-q" id="ivQ">Press Start and I'll read each question out loud. Record your answer, then move on when you're ready.</p>
                 </div>
                 <div class="cam">
                   <video id="camVideo" muted playsinline hidden></video>
-                  <div class="cam-off" id="camOff"><div><i class="ph ph-video-camera-slash"></i>Camera and mic stay off until you press Record.</div></div>
+                  <div class="cam-off" id="camOff"><div><i class="ph ph-video-camera-slash"></i>Camera and mic switch on only while you record.</div></div>
                   <div class="cam-chip" id="camChips" hidden>
-                    <span class="chip rec">Recording</span>
+                    <span class="chip rec" id="recChip">00:00</span>
                     <span class="chip">Expression <span class="ex" id="exprNow">Reading…</span></span>
                   </div>
                 </div>
                 <div class="voice-controls">
-                  <button class="btn btn-primary" id="recBtn" type="button"><i class="ph ph-record"></i> Record answer</button>
-                  <span class="help" id="voiceStatus">Speak for 30 to 90 seconds.</span>
+                  <button class="btn btn-primary" id="startBtn" type="button"><i class="ph ph-play"></i> Start interview</button>
+                  <button class="btn btn-primary" id="recBtn" type="button" hidden><i class="ph ph-record"></i> Record</button>
+                  <button class="btn btn-ghost" id="nextBtn" type="button" hidden>Next question <i class="ph ph-arrow-right"></i></button>
                 </div>
+                <p class="help" id="voiceStatus" aria-live="polite">Works best in Chrome or Edge with sound on.</p>
                 <div>
                   <span class="voice-q-label">Transcript</span>
                   <div class="transcript placeholder" id="transcript" aria-live="polite">Your words appear here as you speak.</div>
                 </div>
                 <div id="voiceResult"></div>
-                <p class="privacy"><i class="ph ph-lock-simple"></i> Expression reading runs on your device. Transcription uses your browser's built-in speech service (works best in Chrome or Edge).</p>
+                <p class="privacy"><i class="ph ph-lock-simple"></i> Expression reading runs on your device. Transcription and the interviewer's voice use your browser's built-in speech services.</p>
               </div>
             </div>
           </div>
@@ -571,7 +603,7 @@
       if (on) { panel.hidden = false; panel.classList.remove("enter"); void panel.offsetWidth; panel.classList.add("enter"); if (focus) t.focus(); }
       else panel.hidden = true;
     });
-    if (name !== "prep" && voice.active) voice.stop();
+    if (name !== "prep" && typeof mock !== "undefined") mock.leave();
   }
   tabs.forEach((t, i) => {
     t.addEventListener("click", () => selectTab(t.dataset.tab));
@@ -771,7 +803,7 @@
     else {
       const c = l => coach.results.filter(x => x === l).length;
       $("#coachProgress").textContent = "Done";
-      await botSay(`That's all five. <strong>${c("strong")} strong, ${c("decent")} decent, ${c("vague")} vague.</strong> Rework the vague ones with a named lab, technique or project, then try them out loud in Voice practice.<br><br><button class="btn btn-ghost btn-sm" id="coachRestart" type="button"><i class="ph ph-arrow-counter-clockwise"></i> Start again</button>`, 900);
+      await botSay(`That's all five. <strong>${c("strong")} strong, ${c("decent")} decent, ${c("vague")} vague.</strong> Rework the vague ones with a named lab, technique or project, then try them out loud in the AI mock interview.<br><br><button class="btn btn-ghost btn-sm" id="coachRestart" type="button"><i class="ph ph-arrow-counter-clockwise"></i> Start again</button>`, 900);
       chatInput.disabled = true; $("#chatSend").disabled = true;
     }
     coach.busy = false;
@@ -784,12 +816,15 @@
   const prepObs = new MutationObserver(() => { if (!$("#panel-prep").hidden && !coachStarted) { coachStarted = true; startCoach(); } });
   prepObs.observe($("#panel-prep"), { attributes: true, attributeFilter: ["hidden"] });
 
-  /* ================= VOICE PRACTICE ================= */
-  $("#voiceQ").innerHTML = COACH_QS.map((c, i) => `<option value="${i}">${c.q}</option>`).join("");
+  /* ================= AI MOCK INTERVIEW ================= */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const synth = window.speechSynthesis;
   const FACE_CDN = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14";
   const EXPR_LABEL = { neutral: "Neutral", happy: "Happy", surprised: "Surprised", fearful: "Nervous", sad: "Nervous", angry: "Tense", disgusted: "Tense" };
-  const camVideo = $("#camVideo"), recBtn = $("#recBtn"), transcriptEl = $("#transcript");
+  const camVideo = $("#camVideo"), recBtn = $("#recBtn"), startBtn = $("#startBtn"), nextBtn = $("#nextBtn"), repeatBtn = $("#repeatBtn");
+  const transcriptEl = $("#transcript"), statusEl = $("#voiceStatus"), ivBox = $("#interviewer");
+  const fmt = s => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+  const warn = msg => { statusEl.innerHTML = `<span class="warn"><i class="ph ph-warning"></i> ${msg}</span>`; };
   let faceReady = null;
 
   function loadFaceApi() {
@@ -811,28 +846,93 @@
     return faceReady;
   }
 
+  /* ---- Interviewer voice (text-to-speech) ---- */
+  const tts = {
+    utterance: null,   // Held on purpose: Chrome garbage-collects unreferenced utterances and onend never fires.
+    keepAlive: null, fallback: null, done: null,
+    voice() {
+      const vs = synth ? synth.getVoices() : [];
+      return vs.find(v => /en-GB/i.test(v.lang) && /female|serena|kate|libby|sonia|google uk english female/i.test(v.name))
+        || vs.find(v => /en-GB/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+    },
+    speak(text) {
+      this.cancel();
+      if (!synth) return Promise.resolve();
+      return new Promise(resolve => {
+        const finish = () => {
+          if (this.done !== finish) return;
+          this.done = null;
+          clearInterval(this.keepAlive); clearTimeout(this.fallback);
+          ivBox.classList.remove("speaking");
+          resolve();
+        };
+        this.done = finish;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "en-GB"; u.rate = 1; u.pitch = 1;
+        const v = this.voice(); if (v) u.voice = v;
+        u.onend = finish; u.onerror = finish;
+        this.utterance = u;
+        ivBox.classList.add("speaking");
+        synth.speak(u);
+        synth.resume();
+        // Chrome stalls long utterances after ~15s; nudging pause/resume keeps it going.
+        this.keepAlive = setInterval(() => { if (synth.speaking) { synth.pause(); synth.resume(); } }, 9000);
+        // Safety net in case onend still never arrives.
+        this.fallback = setTimeout(finish, text.split(/\s+/).length * 480 + 4000);
+      });
+    },
+    cancel() {
+      const d = this.done;
+      if (synth) synth.cancel();
+      if (d) d();
+    }
+  };
+  if (synth && synth.onvoiceschanged !== undefined) synth.onvoiceschanged = () => {};
+
+  /* ---- Recording: camera + mic + transcription + expressions ---- */
   const voice = {
     active: false, stream: null, rec: null, finalText: "", interim: "", tally: {}, frames: 0, loop: null, timer: null, t0: 0,
 
     async start() {
-      $("#voiceResult").innerHTML = "";
+      if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        warn("Camera and mic need a secure page. Open this on localhost or https in Chrome or Edge.");
+        return false;
+      }
+      try {
+        if (navigator.permissions) {
+          const mic = await navigator.permissions.query({ name: "microphone" });
+          if (mic.state === "denied") { warn("Microphone access is blocked for this site. Allow it from the icon in the address bar, then press Record again."); return false; }
+        }
+      } catch (e) { /* Some browsers can't query this; getUserMedia below will tell us. */ }
+
+      let videoOn = true;
       try {
         this.stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 400, facingMode: "user" }, audio: true });
       } catch (err) {
-        $("#voiceStatus").innerHTML = `<span class="warn"><i class="ph ph-warning"></i> Camera or mic access was blocked. Allow it in your browser's site settings and try again.</span>`;
-        return;
+        if (err.name === "NotFoundError" || err.name === "OverconstrainedError" || err.name === "NotReadableError") {
+          try { this.stream = await navigator.mediaDevices.getUserMedia({ audio: true }); videoOn = false; }
+          catch (err2) { err = err2; }
+        }
+        if (!this.stream) {
+          warn(err.name === "NotAllowedError" ? "Camera or mic permission was denied. Allow it from the icon in the address bar and try again."
+            : err.name === "NotFoundError" ? "No microphone was found. Plug one in and try again."
+            : err.name === "NotReadableError" ? "Your camera or mic is in use by another app. Close it and try again."
+            : "Couldn't start recording (" + esc(err.name || "unknown error") + ").");
+          return false;
+        }
       }
+
       this.active = true; this.finalText = ""; this.interim = ""; this.tally = {}; this.frames = 0;
-      camVideo.srcObject = this.stream; camVideo.hidden = false; $("#camOff").hidden = true; $("#camChips").hidden = false;
-      await camVideo.play().catch(() => {});
-      recBtn.innerHTML = `<i class="ph ph-stop"></i> Stop and score`;
+      if (videoOn) {
+        camVideo.srcObject = this.stream; camVideo.hidden = false; $("#camOff").hidden = true;
+        await camVideo.play().catch(() => {});
+      }
+      $("#camChips").hidden = false;
       transcriptEl.classList.remove("placeholder"); transcriptEl.textContent = "Listening…";
-      $("#voiceStatus").textContent = "Answer the question out loud.";
+      statusEl.textContent = videoOn ? "Recording. Press Stop when you've finished your answer." : "Recording audio only; no camera was available.";
       this.t0 = Date.now();
-      this.timer = setInterval(() => {
-        const s = Math.floor((Date.now() - this.t0) / 1000);
-        $("#voiceTimer").textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
-      }, 250);
+      $("#recChip").textContent = "00:00";
+      this.timer = setInterval(() => { $("#recChip").textContent = fmt(Math.floor((Date.now() - this.t0) / 1000)); }, 250);
 
       if (SR) {
         this.rec = new SR();
@@ -845,15 +945,16 @@
             else interim += r[0].transcript;
           }
           this.interim = interim;
-          transcriptEl.innerHTML = esc(this.finalText) + `<span class="interim">${esc(interim)}</span>` || "Listening…";
+          transcriptEl.innerHTML = esc(this.finalText) + `<span class="interim">${esc(interim)}</span>`;
         };
         this.rec.onend = () => { if (this.active) { try { this.rec.start(); } catch (e) {} } };
-        this.rec.onerror = ev => { if (ev.error === "not-allowed" || ev.error === "service-not-allowed") { transcriptEl.textContent = "Speech recognition isn't available here. Try Chrome or Edge."; } };
+        this.rec.onerror = ev => { if (ev.error === "not-allowed" || ev.error === "service-not-allowed") transcriptEl.textContent = "Speech recognition isn't available here. Try Chrome or Edge."; };
         try { this.rec.start(); } catch (e) {}
       } else {
         transcriptEl.textContent = "This browser doesn't support live transcription. Expression reading still works; try Chrome or Edge for scoring.";
       }
 
+      if (!videoOn) { $("#exprNow").textContent = "No camera"; return true; }
       $("#exprNow").textContent = "Loading model…";
       loadFaceApi().then(() => {
         if (!this.active) return;
@@ -873,20 +974,21 @@
         };
         tick();
       }).catch(() => { $("#exprNow").textContent = "Unavailable offline"; });
+      return true;
     },
 
+    // Always releases the camera and mic.
     stop() {
       this.active = false;
       clearTimeout(this.loop); clearInterval(this.timer);
       if (this.rec) { try { this.rec.onend = null; this.rec.stop(); } catch (e) {} this.rec = null; }
       if (this.stream) { this.stream.getTracks().forEach(t => t.stop()); this.stream = null; }
       camVideo.srcObject = null; camVideo.hidden = true; $("#camOff").hidden = false; $("#camChips").hidden = true;
-      recBtn.innerHTML = `<i class="ph ph-record"></i> Record again`;
-      $("#voiceStatus").textContent = "Camera and mic are off.";
-      this.report();
+      statusEl.textContent = "Camera and mic are off.";
+      return this.score();
     },
 
-    report() {
+    score() {
       const text = (this.finalText + " " + this.interim).trim();
       if (text) transcriptEl.textContent = text;
       const exprRows = Object.entries(this.tally).sort((a, b) => b[1] - a[1]).map(([k, v]) => {
@@ -899,21 +1001,127 @@
         : topExpr[0] === "Happy" ? "Warm and engaged. Good energy for a first impression."
         : "Calm and steady. A quick smile at the start and end helps you come across as engaged.";
 
-      let body;
+      let body, level = null;
       if (!text) {
-        body = `<div class="result-top"><h4>No speech captured</h4></div><p>${SR ? "Nothing was transcribed. Check your mic and speak a little closer." : "Transcription needs Chrome or Edge, so only your expression was scored."}</p>`;
+        body = `<div class="result-top"><h4>No speech captured</h4></div><p>${SR ? "Nothing was transcribed. Check your mic and speak a little closer, then record again." : "Transcription needs Chrome or Edge, so only your expression was scored."}</p>`;
       } else {
         const r = judge(text);
+        level = r.level;
         const verdict = r.level === "strong" ? "Specific, grounded and easy to believe." : r.advice.slice(0, 2).join(" ");
-        body = `<div class="result-top"><h4>Your answer</h4><span class="level ${r.level}">${LEVEL_TEXT[r.level]}</span><span class="help">${r.words} words</span></div>
+        body = `<div class="result-top"><h4>Your answer</h4><span class="level ${r.level}">${LEVEL_TEXT[r.level]}</span><span class="help">${r.words} words · ${fmt(Math.floor((Date.now() - this.t0) / 1000))}</span></div>
           <p>${esc(verdict)}</p>
           ${r.hits.length ? `<div class="kw">${r.hits.slice(0, 10).map(h => `<span>${esc(h)}</span>`).join("")}</div>` : ""}`;
       }
       if (exprRows) body += `<div class="expr-bars">${exprRows}</div><p>${exprNote}</p>`;
       $("#voiceResult").innerHTML = `<div class="result">${body}</div>`;
+      return { level, expr: topExpr ? topExpr[0] : null };
     }
   };
-  recBtn.addEventListener("click", () => voice.active ? voice.stop() : voice.start());
+
+  /* ---- Interview flow ---- */
+  const mock = {
+    running: false, i: 0, results: [],
+
+    setRec(recording) {
+      recBtn.classList.toggle("btn-primary", !recording);
+      recBtn.classList.toggle("btn-rec", recording);
+      recBtn.innerHTML = recording ? `<i class="ph ph-stop"></i> Stop` : `<i class="ph ph-record"></i> ${this.results[this.i] ? "Record again" : "Record"}`;
+    },
+
+    async start() {
+      tts.cancel();
+      this.running = true; this.i = 0; this.results = [];
+      startBtn.hidden = true;
+      recBtn.hidden = false; nextBtn.hidden = false; repeatBtn.hidden = false;
+      await this.ask();
+    },
+
+    async ask() {
+      const q = COACH_QS[this.i];
+      $("#mockProgress").textContent = `Question ${this.i + 1} of ${COACH_QS.length}`;
+      $("#ivQ").textContent = q.q;
+      $("#voiceResult").innerHTML = "";
+      transcriptEl.classList.add("placeholder"); transcriptEl.textContent = "Your words appear here as you speak.";
+      nextBtn.innerHTML = this.i === COACH_QS.length - 1 ? `Finish <i class="ph ph-flag-checkered"></i>` : `Next question <i class="ph ph-arrow-right"></i>`;
+      this.setRec(false);
+      recBtn.disabled = true; nextBtn.disabled = true; repeatBtn.disabled = true;
+      $("#ivState").textContent = "Asking…";
+      statusEl.textContent = synth ? "Listen to the question." : "Your browser can't speak, so read the question above.";
+      const idx = this.i;
+      await tts.speak((this.i === 0 ? "Thanks for coming in. " : "") + q.q);
+      if (!this.running || idx !== this.i) return;
+      this.listenReady();
+    },
+
+    listenReady() {
+      $("#ivState").textContent = "Your turn";
+      recBtn.disabled = false; nextBtn.disabled = false; repeatBtn.disabled = false;
+      if (!voice.active) statusEl.textContent = "Press Record and answer out loud. Move on whenever you're ready.";
+    },
+
+    async toggleRecord() {
+      if (voice.active) {
+        recBtn.disabled = true;
+        this.results[this.i] = voice.stop();
+        this.setRec(false);
+        recBtn.disabled = false;
+        statusEl.textContent = this.i === COACH_QS.length - 1 ? "Record again, or press Finish." : "Record again, or press Next question.";
+        return;
+      }
+      tts.cancel();
+      recBtn.disabled = true;
+      const ok = await voice.start();
+      recBtn.disabled = false;
+      if (ok) { this.setRec(true); $("#ivState").textContent = "Listening"; }
+    },
+
+    next() {
+      if (voice.active) { this.results[this.i] = voice.stop(); }
+      tts.cancel();
+      if (this.i < COACH_QS.length - 1) { this.i++; this.ask(); }
+      else this.finish();
+    },
+
+    finish() {
+      this.running = false;
+      recBtn.hidden = true; nextBtn.hidden = true; repeatBtn.hidden = true;
+      startBtn.hidden = false;
+      startBtn.innerHTML = `<i class="ph ph-arrow-counter-clockwise"></i> Start again`;
+      $("#mockProgress").textContent = "Done";
+      $("#ivState").textContent = "Interview finished";
+      const counts = { strong: 0, decent: 0, vague: 0 };
+      this.results.forEach(r => { if (r && r.level) counts[r.level]++; });
+      const answered = counts.strong + counts.decent + counts.vague;
+      $("#ivQ").textContent = answered ? `That's the interview. ${counts.strong} strong, ${counts.decent} decent, ${counts.vague} vague.` : "That's the interview. No answers were scored this time.";
+      const rows = COACH_QS.map((q, i) => {
+        const r = this.results[i];
+        const tag = r && r.level ? `<span class="level ${r.level}">${LEVEL_TEXT[r.level]}</span>` : `<span class="tag">Skipped</span>`;
+        return `<div class="summary-row"><b>Q${i + 1}</b><span>${esc(q.q)}${r && r.expr ? ` · looked ${r.expr.toLowerCase()}` : ""}</span>${tag}</div>`;
+      }).join("");
+      $("#voiceResult").innerHTML = `<div class="result"><div class="result-top"><h4>Interview summary</h4></div><div class="summary">${rows}</div><p>Work on the vague and skipped ones with a named lab, technique or project, then run it again.</p></div>`;
+      statusEl.textContent = "Camera and mic are off.";
+      tts.speak(answered ? "That's the end of the interview. Thanks, and good luck." : "That's the end of the interview.");
+    },
+
+    leave() {
+      if (voice.active) { this.results[this.i] = voice.stop(); this.setRec(false); }
+      tts.cancel();
+      if (this.running) this.listenReady();
+    }
+  };
+
+  startBtn.addEventListener("click", () => mock.start());
+  recBtn.addEventListener("click", () => mock.toggleRecord());
+  nextBtn.addEventListener("click", () => mock.next());
+  repeatBtn.addEventListener("click", async () => {
+    if (voice.active) return;
+    recBtn.disabled = true; nextBtn.disabled = true; repeatBtn.disabled = true;
+    $("#ivState").textContent = "Asking…";
+    const idx = mock.i;
+    await tts.speak(COACH_QS[mock.i].q);
+    if (mock.running && idx === mock.i) mock.listenReady();
+  });
+  addEventListener("pagehide", () => { if (voice.active) voice.stop(); tts.cancel(); });
 
   /* ================= NAV + REVEAL + VIDEO ================= */
   const nav = $("#nav");
