@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fringe Science</title>
-<meta name="description" content="Track niche UK bio-science internships in genomics, mycology, clinical research and health data, then rehearse the interview.">
+<title>BioConnect</title>
+<meta name="description" content="BioConnect helps students find and track bio-science placements across England, then prepare for each interview.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -301,6 +301,38 @@
     .app-row .pipeline { grid-column: 1 / -1; grid-row: 2; }
   }
 
+
+  /* Region filter */
+  .filter-row { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: flex-start; margin-bottom: 24px; }
+  .filter-row .field { margin-bottom: 0; flex: 1 1 320px; }
+  .filter-row .region-field { flex: 0 1 auto; }
+  .field-label { font-size: 14px; font-weight: 600; color: var(--muted); }
+  .seg { display: inline-flex; border: 1px solid var(--line-strong); height: 50px; background: var(--bg); }
+  .seg button { display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; background: none; border: 0; border-right: 1px solid var(--line); color: var(--muted); font-family: var(--display); font-size: 14px; cursor: pointer; transition: background 0.2s, color 0.2s; }
+  .seg button:last-child { border-right: 0; }
+  .seg button:hover { color: var(--text); background: rgba(157, 183, 255, 0.05); }
+  .seg button[aria-checked="true"] { background: var(--lamp); color: var(--lamp-ink); }
+  .region-tag[data-r="north"] { color: var(--moon); border-color: rgba(157, 183, 255, 0.45); }
+  .region-tag[data-r="south"] { color: var(--lamp); border-color: rgba(255, 201, 107, 0.45); }
+
+  /* Tailored prep header */
+  .prep-head { display: grid; grid-template-columns: minmax(240px, 0.8fr) 2fr; gap: 24px; margin-bottom: 28px; align-items: start; }
+  .prep-head .field { margin: 0; max-width: none; }
+  .profile { border: 1px solid var(--line-strong); padding: 20px 22px; display: grid; gap: 14px; background: radial-gradient(120% 120% at 100% 0%, rgba(255, 201, 107, 0.07), transparent 55%), var(--surface); }
+  .profile-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .profile-org { font-family: var(--display); font-size: 20px; font-weight: 600; line-height: 1.2; }
+  .profile-role { font-size: 13.5px; color: var(--muted); margin-top: 2px; }
+  .profile-mission { color: var(--text); font-size: 15px; max-width: 70ch; }
+  .profile-block { display: grid; gap: 8px; }
+  .profile-block p { color: var(--muted); font-size: 14.5px; }
+  .profile-label { font-size: 12.5px; font-weight: 600; color: var(--dim); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip-v { font-size: 13px; font-weight: 600; padding: 5px 11px; background: var(--lamp-soft); color: var(--lamp); border: 1px solid rgba(255, 201, 107, 0.3); transition: transform 0.2s var(--ease); }
+  .chip-v:hover { transform: translateY(-2px); }
+  .profile-note { font-size: 12.5px; color: var(--dim); display: flex; gap: 6px; align-items: flex-start; }
+  .profile-note i { margin-top: 2px; }
+  @media (max-width: 860px) { .prep-head { grid-template-columns: 1fr; } }
+
   /* Interview prep */
   .qa-grid { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 40px; }
   .qa { background: var(--surface); padding: 24px; display: flex; flex-direction: column; gap: 14px; transition: background-color 0.3s; }
@@ -421,9 +453,9 @@
 
 <header class="nav" id="nav">
   <div class="wrap nav-inner">
-    <a href="#top" class="brand" aria-label="Fringe Science home">
+    <a href="#top" class="brand" aria-label="BioConnect home">
       <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
-      Fringe Science
+      BioConnect
     </a>
     <ul class="nav-links">
       <li><a href="#tracker" data-go="dashboard">Dashboard</a></li>
@@ -445,7 +477,7 @@
         <span class="type-ghost" aria-hidden="true">Find, track and land <em><span class="nw">bio-science</span> <span class="nw">internships.<span class="caret"></span></span></em></span>
         <span class="type-live" aria-hidden="true">Find, track and land <em><span class="nw">bio-science</span> <span class="nw">internships.<span class="caret"></span></span></em></span>
       </h1>
-      <p class="hero-sub" data-stagger="2">Built for students hunting UK science placements. Browse programs, track every deadline and application, and practise with AI mock interviews.</p>
+      <p class="hero-sub" data-stagger="2">Built for students hunting science placements across England. Browse programs, track every deadline and application, and practise with AI mock interviews.</p>
       <div class="hero-ctas">
         <a href="#tracker" class="btn btn-primary">Open tracker <i class="ph ph-arrow-down-right"></i></a>
         <a href="#tracker" class="btn btn-ghost" data-go="prep"><i class="ph ph-microphone"></i> Practise interviews</a>
@@ -468,7 +500,7 @@
       <div class="app reveal" id="app">
         <div class="tabs" role="tablist" aria-label="Tracker sections">
           <button class="tab" role="tab" id="tab-dashboard" aria-controls="panel-dashboard" aria-selected="true" data-tab="dashboard"><i class="ph ph-squares-four"></i> Dashboard</button>
-          <button class="tab" role="tab" id="tab-internships" aria-controls="panel-internships" aria-selected="false" data-tab="internships" tabindex="-1"><i class="ph ph-flask"></i> Internships <span class="count" id="countPrograms">8</span></button>
+          <button class="tab" role="tab" id="tab-internships" aria-controls="panel-internships" aria-selected="false" data-tab="internships" tabindex="-1"><i class="ph ph-flask"></i> Internships <span class="count" id="countPrograms"></span></button>
           <button class="tab" role="tab" id="tab-applications" aria-controls="panel-applications" aria-selected="false" data-tab="applications" tabindex="-1"><i class="ph ph-paper-plane-tilt"></i> Applications <span class="count" id="countApps">0</span></button>
           <span class="tab-ink" id="tabInk" aria-hidden="true"></span>
           <button class="tab" role="tab" id="tab-prep" aria-controls="panel-prep" aria-selected="false" data-tab="prep" tabindex="-1"><i class="ph ph-microphone-stage"></i> Interview prep</button>
@@ -487,6 +519,7 @@
 
         <!-- INTERNSHIPS -->
         <div class="panel" role="tabpanel" id="panel-internships" aria-labelledby="tab-internships" hidden>
+          <div class="filter-row">
           <div class="field">
             <label for="search">Search programs</label>
             <div class="input-wrap">
@@ -495,13 +528,23 @@
             </div>
             <span class="help" id="searchHelp">Filters by program, focus area, location or pay as you type.</span>
           </div>
+          <div class="field region-field">
+            <span class="field-label" id="regionLabel">Region in England</span>
+            <div class="seg" role="radiogroup" aria-labelledby="regionLabel" id="regionSeg">
+              <button type="button" role="radio" aria-checked="true" data-region="all">All</button>
+              <button type="button" role="radio" aria-checked="false" data-region="north"><i class="ph ph-arrow-up"></i> North</button>
+              <button type="button" role="radio" aria-checked="false" data-region="south"><i class="ph ph-arrow-down"></i> South</button>
+            </div>
+            <span class="help">North covers the North East, North West and Yorkshire.</span>
+          </div>
+          </div>
           <table class="table">
-            <thead><tr><th>Program</th><th>Focus</th><th>Length</th><th>Pay</th><th>Deadline</th><th></th></tr></thead>
+            <thead><tr><th>Program</th><th>Region</th><th>Focus</th><th>Pay</th><th>Deadline</th><th></th></tr></thead>
             <tbody id="programRows"></tbody>
           </table>
           <div class="empty" id="programEmpty" hidden>
             <h4>No programs match that</h4>
-            <p>Try a broader word like "data", "London" or "paid".</p>
+            <p>Try a broader word like "data" or "paid", or switch the region to All.</p>
           </div>
         </div>
 
@@ -524,6 +567,14 @@
 
         <!-- INTERVIEW PREP -->
         <div class="panel" role="tabpanel" id="panel-prep" aria-labelledby="tab-prep" hidden>
+          <div class="prep-head">
+            <div class="field">
+              <label for="prepFor">Preparing for</label>
+              <select id="prepFor" class="select"></select>
+              <span class="help">Questions, coach and mock interview all switch to this role.</span>
+            </div>
+            <div class="profile" id="prepProfile" aria-live="polite"></div>
+          </div>
           <div class="qa-grid" id="qaGrid"></div>
 
           <div class="practice">
@@ -595,7 +646,7 @@
   <div class="wrap foot">
     <a href="#top" class="brand" aria-label="Back to top">
       <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
-      Fringe Science
+      BioConnect
     </a>
     <span>Program details are sample data for demo use. Check each official site before applying.</span>
   </div>
@@ -604,16 +655,144 @@
 <script>
 (() => {
   /* ================= DATA ================= */
+  const REGION_LABEL = { north: "North", south: "South", both: "North & South" };
   const PROGRAMS = [
-    { id: "wellcome", name: "Wellcome Vacation Scholarships", org: "Wellcome, hosted at UK universities", focus: "Biomedical research", tags: ["lab", "biomedical"], length: "6 to 8 weeks", pay: "Weekly stipend", deadline: "Feb 2027", sort: 202702, where: "UK-wide", url: "https://wellcome.org" },
-    { id: "sanger", name: "Sanger Institute Prize", org: "Wellcome Sanger Institute, Hinxton", focus: "Genomics", tags: ["genomics", "sequencing", "essay"], length: "8 to 10 weeks", pay: "Paid placement + travel", deadline: "Feb 2027", sort: 202702, where: "Cambridge", url: "https://www.sanger.ac.uk" },
-    { id: "lmb", name: "MRC LMB Summer Studentship", org: "MRC Laboratory of Molecular Biology", focus: "Structural & molecular biology", tags: ["structural", "cryo-em"], length: "10 weeks", pay: "Weekly stipend", deadline: "Jan 2027", sort: 202701, where: "Cambridge", url: "https://www2.mrc-lmb.cam.ac.uk" },
-    { id: "hdruk", name: "HDR UK Internship", org: "Health Data Research UK", focus: "Health data science", tags: ["data", "python", "health data"], length: "8 weeks", pay: "Paid salary", deadline: "Mar 2027", sort: 202703, where: "UK-wide, hybrid", url: "https://www.hdruk.ac.uk" },
-    { id: "crick", name: "Crick Summer Internship", org: "The Francis Crick Institute", focus: "Biomedical discovery", tags: ["lab", "biomedical"], length: "8 weeks", pay: "Paid, London rates", deadline: "Jan 2027", sort: 202701, where: "London", url: "https://www.crick.ac.uk" },
-    { id: "nihr", name: "NIHR Research Internship", org: "National Institute for Health and Care Research", focus: "Clinical research", tags: ["clinical", "patients", "trials"], length: "Varies by host", pay: "Funded", deadline: "Rolling", sort: 202712, where: "NHS sites, UK-wide", url: "https://www.nihr.ac.uk" },
-    { id: "az", name: "AstraZeneca R&D Placement", org: "AstraZeneca", focus: "Pharma R&D & data science", tags: ["pharma", "drug discovery", "data"], length: "Summer or 12 months", pay: "Salary", deadline: "Nov 2026", sort: 202611, where: "Cambridge, Macclesfield", url: "https://careers.astrazeneca.com" },
-    { id: "babraham", name: "Babraham Summer School", org: "Babraham Institute", focus: "Epigenetics, immunology, ageing", tags: ["epigenetics", "immunology", "ageing"], length: "10 weeks", pay: "Weekly stipend", deadline: "Feb 2027", sort: 202702, where: "Cambridge", url: "https://www.babraham.ac.uk" }
+    { id: "wellcome", name: "Wellcome Vacation Scholarships", org: "Wellcome", focus: "Biomedical research", tags: ["lab", "biomedical"], length: "6 to 8 weeks", pay: "Weekly stipend", deadline: "Feb 2027", sort: 202702, where: "Host universities across England", region: "both", url: "https://wellcome.org" },
+    { id: "sanger", name: "Sanger Institute Prize", org: "Wellcome Sanger Institute", focus: "Genomics", tags: ["genomics", "sequencing", "essay"], length: "8 to 10 weeks", pay: "Paid placement + travel", deadline: "Feb 2027", sort: 202702, where: "Hinxton, Cambridgeshire", region: "south", url: "https://www.sanger.ac.uk" },
+    { id: "lmb", name: "MRC LMB Summer Studentship", org: "MRC Laboratory of Molecular Biology", focus: "Structural & molecular biology", tags: ["structural", "cryo-em"], length: "10 weeks", pay: "Weekly stipend", deadline: "Jan 2027", sort: 202701, where: "Cambridge", region: "south", url: "https://www2.mrc-lmb.cam.ac.uk" },
+    { id: "hdruk", name: "HDR UK Internship", org: "Health Data Research UK", focus: "Health data science", tags: ["data", "python", "health data"], length: "8 weeks", pay: "Paid salary", deadline: "Mar 2027", sort: 202703, where: "London HQ + partner sites", region: "both", url: "https://www.hdruk.ac.uk" },
+    { id: "crick", name: "Crick Summer Internship", org: "The Francis Crick Institute", focus: "Biomedical discovery", tags: ["lab", "biomedical"], length: "8 weeks", pay: "Paid, London rates", deadline: "Jan 2027", sort: 202701, where: "London", region: "south", url: "https://www.crick.ac.uk" },
+    { id: "nihr", name: "NIHR Research Internship", org: "National Institute for Health and Care Research", focus: "Clinical research", tags: ["clinical", "patients", "trials"], length: "Varies by host", pay: "Funded", deadline: "Rolling", sort: 202712, where: "NHS research sites across England", region: "both", url: "https://www.nihr.ac.uk" },
+    { id: "az", name: "AstraZeneca R&D Placement", org: "AstraZeneca", focus: "Pharma R&D & data science", tags: ["pharma", "drug discovery", "data"], length: "Summer or 12 months", pay: "Salary", deadline: "Nov 2026", sort: 202611, where: "Cambridge & Macclesfield", region: "both", url: "https://careers.astrazeneca.com" },
+    { id: "babraham", name: "Babraham Summer School", org: "Babraham Institute", focus: "Epigenetics, immunology, ageing", tags: ["epigenetics", "immunology", "ageing"], length: "10 weeks", pay: "Weekly stipend", deadline: "Feb 2027", sort: 202702, where: "Cambridge", region: "south", url: "https://www.babraham.ac.uk" },
+    { id: "cruk", name: "CRUK Manchester Institute Summer Studentship", org: "Cancer Research UK Manchester Institute", focus: "Cancer biology", tags: ["cancer", "oncology", "cell biology"], length: "8 weeks", pay: "Weekly stipend", deadline: "Feb 2027", sort: 202702, where: "Manchester", region: "north", url: "https://www.cruk.manchester.ac.uk" },
+    { id: "fera", name: "Fera Science Placement Year", org: "Fera Science", focus: "Plant health & mycology", tags: ["mycology", "fungi", "plant pathology", "diagnostics"], length: "12 months", pay: "Salary", deadline: "Jan 2027", sort: 202701, where: "York", region: "north", url: "https://www.fera.co.uk" },
+    { id: "unilever", name: "Unilever R&D Industrial Placement", org: "Unilever R&D", focus: "Microbiome & formulation science", tags: ["microbiome", "formulation", "industry"], length: "12 months", pay: "Salary", deadline: "Dec 2026", sort: 202612, where: "Port Sunlight, Wirral", region: "north", url: "https://careers.unilever.com" },
+    { id: "gsk", name: "GSK Industrial Placement", org: "GSK", focus: "Quality & manufacturing science", tags: ["pharma", "quality", "manufacturing"], length: "12 months", pay: "Salary", deadline: "Nov 2026", sort: 202611, where: "Barnard Castle, County Durham", region: "north", url: "https://www.gsk.com/en-gb/careers" },
+    { id: "kew", name: "Kew Science Placement", org: "Royal Botanic Gardens, Kew", focus: "Mycology & plant science", tags: ["mycology", "fungi", "botany", "conservation"], length: "Varies by scheme", pay: "Varies by scheme", deadline: "Rolling", sort: 202712, where: "Richmond, London", region: "south", url: "https://www.kew.org" }
   ];
+
+  /* Company profiles for tailored interview prep.
+     Values are paraphrased from each organisation's public mission and values pages. */
+  const PROFILES = {
+    wellcome: { short: "Wellcome", role: "Summer vacation research student",
+      mission: "Wellcome funds discovery research to tackle urgent health challenges.",
+      hook: "the Wellcome-funded lab you'd join at your host university",
+      look: "Genuine curiosity about a research question and evidence you can work independently in a lab for eight weeks.",
+      values: [ { v: "Curiosity-driven discovery", kw: ["discovery", "curious", "curiosity", "question"] }, { v: "Open research", kw: ["open", "sharing", "share", "public"] }, { v: "Inclusion", kw: ["inclusive", "inclusion", "diverse", "diversity"] } ],
+      qs: [
+        { q: "What question would you want to explore in your host lab this summer?", a: "Wellcome funds curiosity. Show you've read your supervisor's recent work and have a focused question.", tip: "Frame it as a question, not a topic: \"How does X affect Y?\"" },
+        { q: "How would you share what you find with people outside your lab?", a: "Wellcome backs open research and public engagement.", tip: "Mention a poster, a short write-up or a group talk, and why openness matters." },
+        { q: "Tell us about working with people from a different background to you.", a: "Inclusion runs through Wellcome's strategy.", tip: "Pick a real team moment and say what you changed in how you worked." } ] },
+    sanger: { short: "Sanger", role: "Summer placement student (genomics)",
+      mission: "The Wellcome Sanger Institute uses genome sequencing at scale to understand biology and disease.",
+      hook: "a Sanger programme such as Tree of Life or cancer genomics",
+      look: "Clear writing (the prize starts with an essay), comfort with data and real interest in genomics.",
+      values: [ { v: "Science at scale", kw: ["scale", "sequencing", "genome", "genomes"] }, { v: "Open data", kw: ["open", "sharing", "public", "data"] }, { v: "Collaboration", kw: ["team", "collaboration", "collaborate", "together"] } ],
+      qs: [
+        { q: "How did you choose the topic for your Sanger Prize essay?", a: "Your essay is the first filter, so expect to defend it.", tip: "Explain why the topic matters to you and one thing you'd add now." },
+        { q: "Sanger shares a lot of its data openly. Why does that matter?", a: "Open data has been core to Sanger since the Human Genome Project.", tip: "Link openness to reproducibility and the speed of discovery." },
+        { q: "How would you handle a genomics dataset too big to open in Excel?", a: "Sanger works at huge scale. They want data instincts, not expertise.", tip: "Mention Python or R, starting on a subset, and asking the team." } ] },
+    lmb: { short: "the LMB", role: "Summer student (structural & molecular biology)",
+      mission: "The MRC Laboratory of Molecular Biology does long-term, fundamental research into how biology works at the molecular level.",
+      hook: "a specific LMB group and its most recent paper",
+      look: "Curiosity, persistence with hard problems and readiness to learn techniques like cryo-EM or crystallography.",
+      values: [ { v: "Fundamental discovery", kw: ["fundamental", "mechanism", "molecular", "discovery"] }, { v: "Ambitious, long-term science", kw: ["ambitious", "persistence", "difficult", "challenge"] }, { v: "Collegiality", kw: ["collaborative", "team", "discussion", "share"] } ],
+      qs: [
+        { q: "Which LMB group would you join, and what problem are they solving?", a: "They expect you to have read about a specific group.", tip: "Name the group leader and sum up one recent paper in a sentence." },
+        { q: "Tell us about a problem you kept working on after the first attempts failed.", a: "LMB science is ambitious and often slow, so persistence matters.", tip: "Show what you changed on each attempt, not just that you kept going." },
+        { q: "Why does understanding molecular structure matter for medicine?", a: "Fundamental work at the LMB led to tools like monoclonal antibodies.", tip: "Give one example of a structure leading to a treatment." } ] },
+    hdruk: { short: "HDR UK", role: "Health data science intern",
+      mission: "Health Data Research UK unites health data to enable discoveries that improve people's lives.",
+      hook: "an HDR UK research area or a health dataset you've worked with",
+      look: "Coding basics (Python or R), statistical thinking and respect for patient data.",
+      values: [ { v: "Trustworthy use of data", kw: ["privacy", "consent", "trust", "ethics", "ethical", "secure"] }, { v: "Patients and public", kw: ["patients", "patient", "public", "involvement"] }, { v: "Team science", kw: ["team", "collaboration", "interdisciplinary"] } ],
+      qs: [
+        { q: "Walk us through a data analysis you've done, from raw data to conclusion.", a: "They want to see your full workflow.", tip: "Cover cleaning, the method, one result and one limitation." },
+        { q: "How would you make sure patient data is used responsibly?", a: "Trust is central to HDR UK's work.", tip: "Mention anonymisation, consent, secure environments and public involvement." },
+        { q: "How would you explain your findings to a clinician with no coding background?", a: "Team science means working across disciplines.", tip: "Lead with the \"so what\", then one clear chart." } ] },
+    crick: { short: "the Crick", role: "Summer research intern",
+      mission: "The Francis Crick Institute does discovery research to understand the biology behind health and disease.",
+      hook: "a Crick lab and how it mixes disciplines",
+      look: "Curiosity, openness to other disciplines and good lab habits.",
+      values: [ { v: "Discovery research", kw: ["discovery", "fundamental", "question"] }, { v: "Interdisciplinary", kw: ["interdisciplinary", "physics", "chemistry", "computational", "maths", "engineering"] }, { v: "Collaboration", kw: ["collaboration", "team", "share"] } ],
+      qs: [
+        { q: "The Crick mixes biologists with physicists, chemists and engineers. How would you contribute?", a: "Show you'd thrive across disciplines.", tip: "Mention a skill from outside biology, such as coding or maths." },
+        { q: "Which Crick lab interests you, and why?", a: "Specific beats enthusiastic.", tip: "Name the group leader and one question their lab is asking." },
+        { q: "Describe how you keep a lab notebook or track your work.", a: "Good habits matter in a large shared institute.", tip: "Mention dating entries, recording failures and reproducibility." } ] },
+    nihr: { short: "NIHR", role: "Clinical research intern",
+      mission: "NIHR funds health and care research that makes a difference to patients and the public.",
+      hook: "an NIHR-funded study or your local research network",
+      look: "Interest in research with real patients, clear communication and an understanding of research ethics.",
+      values: [ { v: "Patients and public first", kw: ["patients", "patient", "public", "people"] }, { v: "Research that improves care", kw: ["care", "treatment", "outcomes", "nhs", "improve"] }, { v: "Inclusion", kw: ["inclusive", "inclusion", "diverse", "underserved"] } ],
+      qs: [
+        { q: "Why clinical research rather than lab research?", a: "Show you understand what clinical research involves.", tip: "Talk about results changing care, and name a trial you've read about." },
+        { q: "How would you explain a research study to a nervous patient?", a: "Patients and the public are at the centre of NIHR's work.", tip: "Plain words, check understanding, and respect their right to say no." },
+        { q: "Why do studies need to include under-served groups?", a: "NIHR prioritises inclusive research.", tip: "Results only apply to the people studied. Give one example." } ] },
+    az: { short: "AstraZeneca", role: "R&D placement student",
+      mission: "AstraZeneca is a science-led biopharmaceutical company that discovers and develops medicines.",
+      hook: "an AstraZeneca therapy area such as oncology or respiratory",
+      look: "Scientific rigour, teamwork in an industry setting and a clear link to patient impact.",
+      values: [ { v: "Follow the science", kw: ["science", "evidence", "data", "experiment"] }, { v: "Put patients first", kw: ["patients", "patient"] }, { v: "Do the right thing", kw: ["ethics", "integrity", "honest", "right"] } ],
+      qs: [
+        { q: "Tell us about a time you let the data change your mind.", a: "Following the science is one of AstraZeneca's values.", tip: "Pick a result that surprised you and say what you did next." },
+        { q: "How does lab work in pharma differ from academic research?", a: "They want to know you understand an industry setting.", tip: "Mention timelines, quality standards, teamwork and patient focus." },
+        { q: "Which AstraZeneca therapy area interests you most?", a: "Show you've looked at their pipeline.", tip: "Name the area and one medicine or trial in it." } ] },
+    babraham: { short: "Babraham", role: "Summer school student",
+      mission: "The Babraham Institute researches the biology of healthy ageing across the life course.",
+      hook: "a Babraham programme such as epigenetics, immunology or signalling",
+      look: "Curiosity about ageing, careful lab practice and willingness to talk about your science.",
+      values: [ { v: "Healthy ageing", kw: ["ageing", "aging", "lifelong", "health"] }, { v: "Openness", kw: ["open", "engagement", "transparent", "animals"] }, { v: "Discovery", kw: ["discovery", "fundamental", "question"] } ],
+      qs: [
+        { q: "Why does studying ageing matter for health?", a: "Healthy ageing is Babraham's core mission.", tip: "Link ageing biology to a real condition, such as immune decline." },
+        { q: "Babraham is open about its use of animals in research. What's your view?", a: "Openness is part of their culture.", tip: "Be honest and balanced. Mention the 3Rs: replace, reduce, refine." },
+        { q: "What is epigenetics, in one minute?", a: "A likely knowledge check for many Babraham labs.", tip: "Use a simple analogy and one example, like DNA methylation." } ] },
+    cruk: { short: "the Manchester Institute", role: "Summer student (cancer biology)",
+      mission: "The Cancer Research UK Manchester Institute researches how cancer works so it can be beaten.",
+      hook: "a Manchester Institute group and the cancer it studies",
+      look: "Interest in cancer biology, careful technique and a clear link between lab work and patients.",
+      values: [ { v: "Beating cancer", kw: ["cancer", "tumour", "tumor"] }, { v: "Translational impact", kw: ["translational", "patients", "clinic", "treatment"] }, { v: "Collaboration", kw: ["collaboration", "team"] } ],
+      qs: [
+        { q: "Which area of cancer research interests you most, and why?", a: "Be specific about a cancer type or mechanism.", tip: "Name a group at the Institute working on it." },
+        { q: "How does lab research reach cancer patients?", a: "Translational research links the bench to the bedside.", tip: "Describe one step from discovery to clinical trial." },
+        { q: "Which technique would you use to study cancer cells, and why?", a: "They want to hear how you think in the lab.", tip: "Name it (cell culture, flow cytometry, imaging) and what it measures." } ] },
+    fera: { short: "Fera", role: "Placement-year scientist (plant health & mycology)",
+      mission: "Fera Science provides science that protects plants, food and the environment.",
+      hook: "Fera's work on plant pathogens and fungi",
+      look: "Practical lab skills, attention to detail and interest in plant disease and fungi.",
+      values: [ { v: "Protecting plants and food", kw: ["plant", "plants", "food", "crops", "pathogen", "disease"] }, { v: "Applied science", kw: ["applied", "practical", "industry", "testing"] }, { v: "Accuracy", kw: ["accurate", "accuracy", "quality", "careful"] } ],
+      qs: [
+        { q: "Why are fungal plant pathogens such a big deal?", a: "Mycology is central to Fera's plant health work.", tip: "Give one example, such as ash dieback or wheat rust." },
+        { q: "How would you make sure a diagnostic test result is reliable?", a: "Accuracy matters when results affect growers and regulators.", tip: "Mention controls, replicates and following the protocol exactly." },
+        { q: "What would you want to learn in a placement year here?", a: "Show a clear plan for growth.", tip: "Name two skills, such as PCR diagnostics and microscopy." } ] },
+    unilever: { short: "Unilever", role: "R&D industrial placement student",
+      mission: "Unilever R&D develops science-backed home and personal care products.",
+      hook: "Unilever's microbiome or sustainable formulation research",
+      look: "Science applied to real products, teamwork and a genuine interest in sustainability.",
+      values: [ { v: "Sustainability", kw: ["sustainable", "sustainability", "environment", "plastic"] }, { v: "Consumer-focused science", kw: ["consumer", "consumers", "people", "product"] }, { v: "Teamwork", kw: ["team", "collaboration"] } ],
+      qs: [
+        { q: "How would you make a product more sustainable without losing performance?", a: "Sustainability is central to Unilever's purpose.", tip: "Mention ingredients, packaging or energy use, and testing it still works." },
+        { q: "Why does the skin or oral microbiome matter for product design?", a: "Microbiome science is a strength at Port Sunlight.", tip: "Explain the microbiome simply and give one product link." },
+        { q: "Tell us about turning a scientific idea into something practical.", a: "Industry R&D is about applying science.", tip: "Use a project where you built, tested or improved something." } ] },
+    gsk: { short: "GSK", role: "Industrial placement student (quality & manufacturing)",
+      mission: "GSK unites science, technology and talent to get ahead of disease together.",
+      hook: "how GSK makes medicines safely at Barnard Castle",
+      look: "Precision, a quality mindset and interest in how medicines are made safely.",
+      values: [ { v: "Ambitious for patients", kw: ["patients", "patient"] }, { v: "Accountable for impact", kw: ["responsibility", "accountable", "ownership", "impact"] }, { v: "Do the right thing", kw: ["integrity", "quality", "honest", "ethics"] } ],
+      qs: [
+        { q: "Why does quality control matter so much in making medicines?", a: "Patient safety depends on it.", tip: "Link a small error to a real impact on a patient." },
+        { q: "Tell us about a time you owned a mistake.", a: "Accountability is one of GSK's expectations.", tip: "Say what went wrong, what you did and what changed after." },
+        { q: "What would you do if you thought a strict protocol could be improved?", a: "This tests integrity and process thinking.", tip: "Follow it first, raise it through the right channel, never cut corners." } ] },
+    kew: { short: "Kew", role: "Science placement (mycology & plant science)",
+      mission: "Kew's mission is to understand and protect plants and fungi for the wellbeing of people and the future of all life on Earth.",
+      hook: "Kew's Fungarium or Millennium Seed Bank research",
+      look: "Passion for plants or fungi, careful handling of collections and interest in conservation.",
+      values: [ { v: "Protecting biodiversity", kw: ["biodiversity", "conservation", "protect", "species"] }, { v: "Plants and fungi", kw: ["fungi", "fungal", "mycology", "plants", "plant"] }, { v: "Sharing knowledge", kw: ["public", "share", "education", "collections"] } ],
+      qs: [
+        { q: "Why do fungi matter for the planet?", a: "Kew's mission covers fungi as well as plants.", tip: "Mention decomposition, mycorrhizal networks or medicines." },
+        { q: "How would you handle a fragile specimen in a historic collection?", a: "Collections care is core to Kew's work.", tip: "Talk about following handling protocols and documenting everything." },
+        { q: "How would you explain your research to a visitor at the Gardens?", a: "Kew shares science with millions of visitors.", tip: "One surprising fact, plain words and why it matters to them." } ] }
+  };
   const DASH_IDS = ["wellcome", "sanger", "hdruk", "crick"];
   const STAGES = [
     { key: "prep", label: "Prep essay" },
@@ -735,16 +914,18 @@
     const re = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "ig");
     return safe.replace(re, "<mark>$1</mark>");
   }
+  let region = "all";
+  const inRegion = p => region === "all" || p.region === region || p.region === "both";
   function renderPrograms() {
     const q = search.value.trim();
     const ql = q.toLowerCase();
-    const list = PROGRAMS.filter(p => !ql || [p.name, p.org, p.focus, p.pay, p.where, p.length, ...p.tags].join(" ").toLowerCase().includes(ql));
+    const list = PROGRAMS.filter(p => inRegion(p) && (!ql || [p.name, p.org, p.focus, p.pay, p.where, p.length, REGION_LABEL[p.region], ...p.tags].join(" ").toLowerCase().includes(ql)));
     $("#programRows").innerHTML = list.map(p => {
       const tracked = !!appFor(p.id);
       return `<tr>
         <td data-label="Program"><div class="prog-name">${hl(p.name, q)}</div><div class="prog-org">${hl(p.org, q)} · ${hl(p.where, q)}</div></td>
-        <td data-label="Focus" class="muted">${hl(p.focus, q)}</td>
-        <td data-label="Length" class="muted">${hl(p.length, q)}</td>
+        <td data-label="Region"><span class="tag region-tag" data-r="${p.region}">${REGION_LABEL[p.region]}</span></td>
+        <td data-label="Focus" class="muted">${hl(p.focus, q)}<div class="prog-org">${hl(p.length, q)}</div></td>
         <td data-label="Pay"><span class="pay"><i class="ph ph-coins"></i>${hl(p.pay, q)}</span></td>
         <td data-label="Deadline"><span class="deadline">${p.deadline}</span></td>
         <td data-label="Track">${tracked
@@ -754,8 +935,17 @@
     }).join("");
     $("#programEmpty").hidden = list.length > 0;
     $("#programRows").closest("table").hidden = list.length === 0;
-    $("#searchHelp").textContent = ql ? `${list.length} of ${PROGRAMS.length} programs match "${q}".` : "Filters by program, focus area, location or pay as you type.";
+    const where = region === "all" ? "across England" : `in the ${REGION_LABEL[region]}`;
+    $("#searchHelp").textContent = ql ? `${list.length} programs ${where} match "${q}".` : region === "all" ? "Filters by program, focus area, location or pay as you type." : `${list.length} programs ${where}, including ones that run in both.`;
+    $("#countPrograms").textContent = PROGRAMS.length;
   }
+  $("#regionSeg").addEventListener("click", e => {
+    const b = e.target.closest("[data-region]"); if (!b) return;
+    region = b.dataset.region;
+    document.querySelectorAll("#regionSeg [data-region]").forEach(x => x.setAttribute("aria-checked", x === b));
+    renderPrograms();
+    if (typeof staggerIn === "function") staggerIn("internships");
+  });
   search.addEventListener("input", renderPrograms);
   $("#programRows").addEventListener("click", e => {
     const t = e.target.closest("[data-track]");
@@ -774,6 +964,7 @@
         <div class="pipeline" aria-label="Stage ${idx + 1} of 4: ${STAGES[idx].label}">${steps}</div>
         <div class="app-actions">
           <button class="badge" data-s="${a.s}" data-advance="${a.id}" title="Move to next stage">${STAGES[idx].label}</button>
+          <button class="icon-btn" data-prep="${a.id}" aria-label="Prepare for ${esc(p.name)} interview" title="Interview prep"><i class="ph ph-microphone-stage"></i></button>
           <button class="icon-btn" data-remove="${a.id}" aria-label="Stop tracking ${esc(p.name)}"><i class="ph ph-x"></i></button>
         </div>
       </div>`;
@@ -792,6 +983,8 @@
       a.s = STAGES[(i + 1) % STAGES.length].key;
       save(); renderAll(); return;
     }
+    const pr = e.target.closest("[data-prep]");
+    if (pr) { setPrepFor(pr.dataset.prep); selectTab("prep"); return; }
     const rm = e.target.closest("[data-remove]");
     if (rm) { state.apps = state.apps.filter(a => a.id !== rm.dataset.remove); save(); renderAll(); }
   });
@@ -804,13 +997,60 @@
   function renderAll() { renderStats(); renderDeadlines(); renderPrograms(); renderApps(); }
   renderAll();
 
-  /* ================= Q&A CARDS ================= */
-  $("#qaGrid").innerHTML = QA.map((c, i) => `
+  /* ================= TAILORED PREP ================= */
+  // QA, COACH_QS and KEYWORDS are swapped in place so the coach and mock interview pick up the new role without changes.
+  const GENERAL_QA = QA.slice(), GENERAL_COACH = COACH_QS.slice(), BASE_KW = KEYWORDS.slice();
+  let VALUE_KW = [], VALUE_NAMES = [];
+  function buildPrep(id) {
+    const pr = PROFILES[id];
+    if (!pr) return { qa: GENERAL_QA, coach: GENERAL_COACH, kw: [] };
+    const qa = [
+      { q: `Why ${pr.short} rather than a mainstream grad scheme?`, a: `${pr.mission} Connect that mission to something you've already done or read.`, tip: `Mention ${pr.hook}.` },
+      ...pr.qs,
+      { q: `Which of ${pr.short}'s values do you relate to most?`, a: `They emphasise ${pr.values.map(v => v.v.toLowerCase()).join(", ")}. Pick one and back it with a real example.`, tip: `Don't list all of them. One value plus one story beats three buzzwords.` }
+    ];
+    return { qa, coach: qa.map(c => ({ q: c.q, tip: c.tip })), kw: pr.values.flatMap(v => v.kw) };
+  }
+  function renderPrepFor() {
+    const id = state.prepFor && PROFILES[state.prepFor] ? state.prepFor : "general";
+    const built = buildPrep(id);
+    QA.splice(0, QA.length, ...built.qa);
+    COACH_QS.splice(0, COACH_QS.length, ...built.coach);
+    KEYWORDS.splice(0, KEYWORDS.length, ...BASE_KW, ...built.kw);
+    VALUE_KW = built.kw; VALUE_NAMES = id === "general" ? [] : PROFILES[id].values.map(v => v.v);
+
+    const pr = PROFILES[id], p = byId(id);
+    $("#prepProfile").innerHTML = pr ? `
+      <div class="profile-top">
+        <div><div class="profile-org">${esc(p.org)}</div><div class="profile-role">${esc(pr.role)}</div></div>
+        <span class="tag region-tag" data-r="${p.region}">${esc(p.where)}</span>
+      </div>
+      <p class="profile-mission">${esc(pr.mission)}</p>
+      <div class="profile-block"><span class="profile-label">What they value</span><div class="chips">${pr.values.map(v => `<span class="chip-v">${esc(v.v)}</span>`).join("")}</div></div>
+      <div class="profile-block"><span class="profile-label">What they look for</span><p>${esc(pr.look)}</p></div>
+      <p class="profile-note"><i class="ph ph-info"></i> Paraphrased from their public mission and values. Check their careers page before the interview.</p>` : `
+      <div class="profile-top"><div><div class="profile-org">General bio-science interview</div><div class="profile-role">Any placement</div></div></div>
+      <p class="profile-mission">Common questions most labs and companies ask. Pick a program to tailor every question to its role and values.</p>`;
+
+    $("#qaGrid").innerHTML = QA.map((c, i) => `
     <article class="qa">
-      <div class="qa-q"><span>Q${i + 1}</span><h4 class="hx">${c.q}</h4></div>
-      <p>${c.a}</p>
-      <div class="tip"><i class="ph ph-lightbulb-filament"></i><span>${c.tip}</span></div>
+      <div class="qa-q"><span>Q${i + 1}</span><h4 class="hx">${esc(c.q)}</h4></div>
+      <p>${esc(c.a)}</p>
+      <div class="tip"><i class="ph ph-lightbulb-filament"></i><span>${esc(c.tip)}</span></div>
     </article>`).join("");
+  }
+  function setPrepFor(id) {
+    state.prepFor = id; save();
+    $("#prepFor").value = PROFILES[id] ? id : "general";
+    renderPrepFor();
+    if (typeof coachStarted !== "undefined" && coachStarted) startCoach();
+    if (typeof mock !== "undefined" && mock.running) mock.start();
+  }
+  const optGroup = (label, r) => `<optgroup label="${label}">${PROGRAMS.filter(p => p.region === r).map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</optgroup>`;
+  $("#prepFor").innerHTML = `<option value="general">General interview</option>` + optGroup("North", "north") + optGroup("South", "south") + optGroup("North & South", "both");
+  $("#prepFor").value = state.prepFor && PROFILES[state.prepFor] ? state.prepFor : "general";
+  $("#prepFor").addEventListener("change", e => { setPrepFor(e.target.value); if (typeof staggerIn === "function") staggerIn("prep"); });
+  renderPrepFor();
 
   /* ================= JUDGE ================= */
   function judge(text) {
@@ -830,6 +1070,7 @@
     if (!hits.includes("project")) advice.push("Mention a concrete project.");
     if (words.length < 30) advice.push("Add one specific example; this was short.");
     if (!proper.length) advice.push("Drop a real name: an institute, group or paper.");
+    if (VALUE_KW.length && !lower.some(w => VALUE_KW.includes(w))) advice.push(`Link it to one of their values, like ${VALUE_NAMES[0].toLowerCase()}.`);
     return { level, hits, words: words.length, advice };
   }
   const LEVEL_TEXT = { strong: "Strong", decent: "Decent", vague: "Vague" };
@@ -859,7 +1100,8 @@
   async function startCoach() {
     chatLog.innerHTML = ""; coach.i = 0; coach.results = [];
     chatInput.disabled = false; $("#chatSend").disabled = false;
-    await botSay("I'll ask five real interview questions. Answer like you're in the room, and I'll score each one for specificity.", 400);
+    const forWho = PROFILES[state.prepFor] ? ` for the ${byId(state.prepFor).org} ${PROFILES[state.prepFor].role} role` : "";
+    await botSay(`I'll ask five real interview questions${esc(forWho)}. Answer like you're in the room, and I'll score each one for specificity.`, 400);
     await askCurrent();
   }
   $("#chatForm").addEventListener("submit", async e => {
