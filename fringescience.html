@@ -418,6 +418,20 @@
   .summary { display: grid; gap: 8px; }
   .summary-row { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; font-size: 13.5px; color: var(--muted); padding: 8px 0; border-top: 1px solid var(--line); }
   .summary-row b { font-family: var(--display); color: var(--lamp); font-weight: 500; }
+  .voice-settings { border: 1px solid var(--line); background: var(--bg-2); }
+  .voice-settings summary { list-style: none; display: flex; align-items: center; gap: 8px; padding: 12px 14px; cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--muted); }
+  .voice-settings summary::-webkit-details-marker { display: none; }
+  .voice-settings summary > i:first-child { color: var(--moon); font-size: 17px; }
+  .voice-settings summary span { color: var(--text); }
+  .voice-settings summary .caret-d { margin-left: auto; transition: transform 0.25s var(--ease); }
+  .voice-settings[open] summary .caret-d { transform: rotate(180deg); }
+  .voice-settings summary:hover { color: var(--text); }
+  .vs-body { padding: 4px 14px 16px; display: grid; gap: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .vs-body .field { margin: 0; max-width: none; }
+  .vs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 520px) { .vs-row { grid-template-columns: 1fr; } }
+  .input-plain { padding-left: 14px; height: 46px; }
+  .el-ok { color: var(--lamp); }
   .voice-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .transcript { min-height: 72px; padding: 12px 14px; background: var(--bg); border: 1px solid var(--line); font-size: 14.5px; color: var(--text); }
   .transcript.placeholder { color: var(--dim); }
@@ -632,7 +646,37 @@
                   <div class="transcript placeholder" id="transcript" aria-live="polite">Your words appear here as you speak.</div>
                 </div>
                 <div id="voiceResult"></div>
-                <p class="privacy"><i class="ph ph-lock-simple"></i> Expression reading runs on your device. Transcription and the interviewer's voice use your browser's built-in speech services.</p>
+                <details class="voice-settings" id="voiceSettings">
+                  <summary><i class="ph ph-waveform"></i> Interviewer voice: <span id="voiceMode">Browser voice</span><i class="ph ph-caret-down caret-d"></i></summary>
+                  <div class="vs-body">
+                    <div class="field">
+                      <label for="elKey">ElevenLabs API key</label>
+                      <input id="elKey" class="input input-plain" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your xi-api-key">
+                      <span class="help">Saved only in this browser and sent only to ElevenLabs. Leave empty to use the built-in browser voice.</span>
+                    </div>
+                    <div class="vs-row">
+                      <div class="field">
+                        <label for="elVoice">Voice</label>
+                        <select id="elVoice" class="select"></select>
+                      </div>
+                      <div class="field">
+                        <label for="elModel">Model</label>
+                        <select id="elModel" class="select">
+                          <option value="eleven_v4_turbo">v4 Turbo · fast</option>
+                          <option value="eleven_flash_v2_5">Flash v2.5 · cheapest</option>
+                          <option value="eleven_v4">v4 · best quality</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="voice-controls">
+                      <button class="btn btn-primary btn-sm" type="button" id="elSave"><i class="ph ph-check"></i> Save</button>
+                      <button class="btn btn-ghost btn-sm" type="button" id="elTest"><i class="ph ph-speaker-high"></i> Test voice</button>
+                      <button class="btn btn-ghost btn-sm" type="button" id="elClear">Remove key</button>
+                    </div>
+                    <p class="help" id="elStatus" aria-live="polite"></p>
+                  </div>
+                </details>
+                <p class="privacy"><i class="ph ph-lock-simple"></i> Expression reading runs on your device. Transcription uses your browser's speech service. With an ElevenLabs key, question text is sent to ElevenLabs to generate the voice.</p>
               </div>
             </div>
           </div>
@@ -1165,9 +1209,19 @@
     return faceReady;
   }
 
-  /* ---- Interviewer voice (text-to-speech) ---- */
+  /* ---- Interviewer voice: ElevenLabs when a key is saved, browser speech otherwise ---- */
+  const EL_API = "https://api.elevenlabs.io/v1";
+  const EL_STORE = "fringescience.elevenlabs";
+  const EL_DEFAULT_VOICE = { id: "JBFqnCBsd6RMkjVDRZzb", name: "George" };
+  const el = (() => {
+    try { return Object.assign({ key: "", voiceId: EL_DEFAULT_VOICE.id, voiceName: EL_DEFAULT_VOICE.name, model: "eleven_v4_turbo" }, JSON.parse(localStorage.getItem(EL_STORE) || "{}")); }
+    catch (e) { return { key: "", voiceId: EL_DEFAULT_VOICE.id, voiceName: EL_DEFAULT_VOICE.name, model: "eleven_v4_turbo" }; }
+  })();
+  const saveEl = () => { try { localStorage.setItem(EL_STORE, JSON.stringify(el)); } catch (e) {} };
+
   const tts = {
     utterance: null,   // Held on purpose: Chrome garbage-collects unreferenced utterances and onend never fires.
+    audio: null, abort: null, cache: new Map(),
     keepAlive: null, fallback: null, done: null,
     voice() {
       const vs = synth ? synth.getVoices() : [];
@@ -1176,7 +1230,6 @@
     },
     speak(text) {
       this.cancel();
-      if (!synth) return Promise.resolve();
       return new Promise(resolve => {
         const finish = () => {
           if (this.done !== finish) return;
@@ -1186,26 +1239,141 @@
           resolve();
         };
         this.done = finish;
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = "en-GB"; u.rate = 1; u.pitch = 1;
-        const v = this.voice(); if (v) u.voice = v;
-        u.onend = finish; u.onerror = finish;
-        this.utterance = u;
         ivBox.classList.add("speaking");
-        synth.speak(u);
-        synth.resume();
-        // Chrome stalls long utterances after ~15s; nudging pause/resume keeps it going.
-        this.keepAlive = setInterval(() => { if (synth.speaking) { synth.pause(); synth.resume(); } }, 9000);
-        // Safety net in case onend still never arrives.
-        this.fallback = setTimeout(finish, text.split(/\s+/).length * 480 + 4000);
+        if (el.key) this.eleven(text, finish);
+        else this.browser(text, finish);
       });
     },
+
+    // ElevenLabs text-to-speech. Falls back to the browser voice on any failure.
+    async eleven(text, finish) {
+      const fallback = why => {
+        if (this.done !== finish) return;
+        if (why) { const msg = `<span class="warn"><i class="ph ph-warning"></i> ElevenLabs voice unavailable (${esc(why)}). Using the browser voice.</span>`; statusEl.innerHTML = msg; $("#elStatus").innerHTML = msg; }
+        this.browser(text, finish);
+      };
+      const cacheKey = `${el.model}|${el.voiceId}|${text}`;
+      let url = this.cache.get(cacheKey);
+      if (!url) {
+        const ctrl = new AbortController(); this.abort = ctrl;
+        const timer = setTimeout(() => ctrl.abort(), 15000);
+        try {
+          const res = await fetch(`${EL_API}/text-to-speech/${encodeURIComponent(el.voiceId)}?output_format=mp3_44100_128`, {
+            method: "POST", signal: ctrl.signal,
+            headers: { "Content-Type": "application/json", "xi-api-key": el.key, "Accept": "audio/mpeg" },
+            body: JSON.stringify({ text, model_id: el.model, voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
+          });
+          clearTimeout(timer);
+          if (!res.ok) {
+            let detail = `error ${res.status}`;
+            try { const j = await res.json(); detail = (j.detail && (j.detail.message || j.detail.status)) || detail; } catch (e) {}
+            return fallback(res.status === 401 ? "check your API key" : String(detail).replace(/\.$/, ""));
+          }
+          url = URL.createObjectURL(await res.blob());
+          this.cache.set(cacheKey, url);
+        } catch (err) {
+          clearTimeout(timer);
+          if (this.done !== finish) return;   // Cancelled on purpose.
+          return fallback(err.name === "AbortError" ? "timed out" : "network error");
+        } finally { if (this.abort && this.abort.signal.aborted === false) this.abort = null; }
+      }
+      if (this.done !== finish) return;
+      const audio = new Audio(url);
+      this.audio = audio;   // Keep a reference so the element isn't collected mid-playback.
+      audio.onended = finish;
+      audio.onerror = () => fallback("playback error");
+      audio.onloadedmetadata = () => {
+        clearTimeout(this.fallback);
+        if (isFinite(audio.duration)) this.fallback = setTimeout(finish, audio.duration * 1000 + 3000);
+      };
+      audio.play().catch(() => fallback("autoplay was blocked"));
+    },
+
+    browser(text, finish) {
+      if (!synth) return finish();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-GB"; u.rate = 1; u.pitch = 1;
+      const v = this.voice(); if (v) u.voice = v;
+      u.onend = finish; u.onerror = finish;
+      this.utterance = u;
+      synth.speak(u);
+      synth.resume();
+      // Chrome stalls long utterances after ~15s; nudging pause/resume keeps it going.
+      this.keepAlive = setInterval(() => { if (synth.speaking) { synth.pause(); synth.resume(); } }, 9000);
+      // Safety net in case onend still never arrives.
+      clearTimeout(this.fallback);
+      this.fallback = setTimeout(finish, text.split(/\s+/).length * 480 + 4000);
+    },
+
     cancel() {
       const d = this.done;
+      if (this.abort) { this.abort.abort(); this.abort = null; }
+      if (this.audio) { this.audio.onended = this.audio.onerror = null; this.audio.pause(); this.audio = null; }
       if (synth) synth.cancel();
       if (d) d();
     }
   };
+
+  /* ---- ElevenLabs settings ---- */
+  const elKey = $("#elKey"), elVoice = $("#elVoice"), elModel = $("#elModel"), elStatus = $("#elStatus");
+  function setVoiceOptions(voices) {
+    elVoice.innerHTML = voices.map(v => `<option value="${esc(v.id)}">${esc(v.name)}${v.note ? " · " + esc(v.note) : ""}</option>`).join("");
+    if (!voices.some(v => v.id === el.voiceId)) { el.voiceId = voices[0].id; el.voiceName = voices[0].name; }
+    elVoice.value = el.voiceId;
+  }
+  function renderVoiceMode() {
+    $("#voiceMode").textContent = el.key ? `ElevenLabs · ${el.voiceName}` : "Browser voice";
+    elKey.value = el.key ? "••••••••" + el.key.slice(-4) : "";
+    elModel.value = el.model;
+    $("#elClear").hidden = !el.key;
+  }
+  async function loadVoices() {
+    const res = await fetch(`${EL_API}/voices`, { headers: { "xi-api-key": el.key } });
+    if (res.status === 401) {
+      let missingPerm = false;
+      try { const j = await res.json(); missingPerm = /permission/i.test(JSON.stringify(j)); } catch (e) {}
+      if (!missingPerm) throw new Error("invalid");
+      return null;   // Key works for speech but can't list voices; keep the default voice.
+    }
+    if (!res.ok) throw new Error("http " + res.status);
+    const j = await res.json();
+    return (j.voices || []).map(v => ({ id: v.voice_id, name: v.name, note: [v.labels && v.labels.accent, v.labels && v.labels.gender].filter(Boolean).join(", ") }));
+  }
+  setVoiceOptions([{ id: el.voiceId, name: el.voiceName }]);
+  renderVoiceMode();
+  if (el.key) loadVoices().then(v => { if (v && v.length) setVoiceOptions(v); }).catch(() => {});
+
+  $("#elSave").addEventListener("click", async () => {
+    const typed = elKey.value.trim();
+    if (typed && !typed.startsWith("••")) el.key = typed;
+    if (!el.key) { elStatus.textContent = "Paste a key first, or leave it empty to use the browser voice."; return; }
+    el.model = elModel.value;
+    elStatus.textContent = "Checking your key…";
+    try {
+      const voices = await loadVoices();
+      if (voices && voices.length) setVoiceOptions(voices);
+      saveEl(); renderVoiceMode();
+      elStatus.innerHTML = `<span class="el-ok">Saved.</span> ${voices ? `${voices.length} voices available.` : "This key can't list voices, so the default voice is used."} The interviewer will use ElevenLabs.`;
+    } catch (e) {
+      el.key = ""; saveEl(); renderVoiceMode();
+      elStatus.innerHTML = `<span class="warn"><i class="ph ph-warning"></i> ${e.message === "invalid" ? "That key was rejected. Copy it again from your ElevenLabs profile." : "Couldn't reach ElevenLabs. Check your connection."}</span>`;
+    }
+  });
+  elVoice.addEventListener("change", () => { el.voiceId = elVoice.value; el.voiceName = elVoice.selectedOptions[0].text.split(" · ")[0]; saveEl(); renderVoiceMode(); });
+  elModel.addEventListener("change", () => { el.model = elModel.value; saveEl(); });
+  elKey.addEventListener("focus", () => { if (elKey.value.startsWith("••")) elKey.value = ""; });
+  elKey.addEventListener("blur", () => { if (!elKey.value && el.key) renderVoiceMode(); });
+  $("#elClear").addEventListener("click", () => {
+    el.key = ""; saveEl(); tts.cache.forEach(u => URL.revokeObjectURL(u)); tts.cache.clear();
+    setVoiceOptions([EL_DEFAULT_VOICE]); renderVoiceMode();
+    elStatus.textContent = "Key removed. The interviewer will use the browser voice.";
+  });
+  $("#elTest").addEventListener("click", async () => {
+    if (mock.running || voice.active) { elStatus.textContent = "Finish the interview before testing the voice."; return; }
+    elStatus.textContent = el.key ? "Generating a sample…" : "Playing the browser voice.";
+    await tts.speak("Hi, I'll be your interviewer today. Let's get started.");
+    if (elStatus.textContent.startsWith("Generating")) elStatus.textContent = "";
+  });
   if (synth && synth.onvoiceschanged !== undefined) synth.onvoiceschanged = () => {};
 
   /* ---- Recording: camera + mic + transcription + expressions ---- */
