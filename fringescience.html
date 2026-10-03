@@ -89,7 +89,18 @@
 
   /* ---------- Hero ---------- */
   .hero { position: relative; min-height: 100dvh; display: flex; align-items: flex-end; overflow: hidden; isolation: isolate; }
-  .hero video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transform: scale(1.04); animation: settle 2.4s var(--ease) forwards; }
+  .hero-media { position: absolute; inset: -48px; z-index: -2; will-change: transform; }
+  .hero video { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.16); filter: brightness(0.4) blur(6px); animation: settle 2.8s var(--ease) forwards; }
+  .motes { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .mote { position: absolute; bottom: -10px; background: var(--moon); opacity: 0; animation: drift linear infinite; }
+  .mote.warm { background: var(--lamp); }
+  @keyframes drift { 0% { transform: translate3d(0, 0, 0); opacity: 0; } 12% { opacity: var(--o); } 85% { opacity: var(--o); } 100% { transform: translate3d(var(--dx), -105vh, 0); opacity: 0; } }
+  .scroll-cue { position: absolute; right: var(--gutter); bottom: clamp(56px, 10vh, 112px); display: grid; gap: 4px; justify-items: center; opacity: 0; animation: rise 0.8s var(--ease) 3.2s forwards; text-decoration: none; }
+  .scroll-cue span { width: 6px; height: 6px; background: var(--moon); animation: cue 1.6s steps(1) infinite; }
+  .scroll-cue span:nth-child(2) { animation-delay: 0.2s; }
+  .scroll-cue span:nth-child(3) { animation-delay: 0.4s; background: var(--lamp); }
+  @keyframes cue { 0%, 100% { opacity: 0.15; } 30%, 60% { opacity: 1; } }
+  @media (max-width: 760px) { .scroll-cue { display: none; } }
   .hero::after {
     content: ""; position: absolute; inset: 0; z-index: -1;
     background:
@@ -98,16 +109,28 @@
   }
   .scan { position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0.18;
     background: repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0 1px, transparent 1px 3px); }
-  @keyframes settle { to { transform: scale(1); } }
-  .hero-content { width: 100%; padding-bottom: clamp(56px, 10vh, 112px); padding-top: 96px; }
+  @keyframes settle { to { transform: scale(1.04); filter: none; } }
+  .hero-content { width: 100%; padding-bottom: clamp(56px, 10vh, 112px); padding-top: 96px; will-change: transform, opacity; }
   .hero h1 { font-size: clamp(40px, 6vw, 80px); max-width: 15ch; line-height: 1.02; }
   .hero h1 em { font-style: normal; color: var(--lamp); }
+  .type { position: relative; cursor: default; }
+  .type-ghost { visibility: hidden; }
+  .type-live { position: absolute; inset: 0; transition: text-shadow 0.3s var(--ease), transform 0.3s var(--ease); }
+  .type:hover .type-live { transform: translate(-3px, -3px); text-shadow: 3px 3px 0 rgba(255, 201, 107, 0.35), 6px 6px 0 rgba(157, 183, 255, 0.18); }
+  .caret { display: inline-block; width: 0.42em; height: 0.82em; margin-left: 0.08em; vertical-align: -0.06em; background: var(--lamp); animation: caret 1s steps(1) infinite; box-shadow: 0 0 18px rgba(255, 201, 107, 0.55); }
+  .type.typing .caret { animation: none; }
+  @keyframes caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
   .hero-sub { margin-top: 22px; max-width: 46ch; color: var(--muted); font-size: clamp(16px, 1.3vw, 18px); }
   .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
-  .hero [data-stagger] { opacity: 0; transform: translateY(18px); animation: rise 0.9s var(--ease) forwards; }
-  .hero [data-stagger="1"] { animation-delay: 0.25s; }
-  .hero [data-stagger="2"] { animation-delay: 0.45s; }
-  .hero [data-stagger="3"] { animation-delay: 0.6s; }
+  .hero [data-stagger] { opacity: 0; transform: translateY(18px); filter: blur(6px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease), filter 0.9s var(--ease); }
+  .hero.typed [data-stagger] { opacity: 1; transform: none; filter: none; }
+  .hero.typed [data-stagger="3"] { transition-delay: 0.15s; }
+  .hero-ctas .btn { opacity: 0; transform: translateY(10px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease), background 0.2s, border-color 0.2s, box-shadow 0.2s; }
+  .hero.typed .hero-ctas .btn { opacity: 1; transform: none; transition-delay: 0.25s, 0.25s, 0s, 0s, 0s; }
+  .hero.typed .hero-ctas .btn + .btn { transition-delay: 0.38s, 0.38s, 0s, 0s, 0s; }
+  .hero.typed .hero-ctas .btn:hover { transition-delay: 0s; }
+  .nav { animation: navIn 0.9s var(--ease) 0.1s both; }
+  @keyframes navIn { from { transform: translateY(-100%); opacity: 0; } to { transform: none; opacity: 1; } }
   @keyframes rise { to { opacity: 1; transform: none; } }
 
   /* ---------- Field strip (the page's single marquee) ---------- */
@@ -115,12 +138,37 @@
   .strip-track { display: flex; width: max-content; animation: slide 46s linear infinite; }
   .strip:hover .strip-track { animation-play-state: paused; }
   .strip-item { display: flex; align-items: center; gap: 14px; padding: 20px 28px; font-family: var(--pixel); font-size: 22px; color: var(--muted); white-space: nowrap; }
-  .strip-item i { color: var(--moon); font-size: 22px; }
+  .strip-item { transition: color 0.2s; }
+  .strip-item i { color: var(--moon); font-size: 22px; transition: transform 0.5s var(--ease), color 0.2s; }
+  .strip-item:hover { color: var(--text); }
+  .strip-item:hover i { transform: rotate(180deg) scale(1.15); color: var(--lamp); }
   @keyframes slide { to { transform: translateX(-50%); } }
 
   /* ---------- Section reveal ---------- */
   .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
   .reveal.in { opacity: 1; transform: none; }
+  .st-in { animation: stIn 0.65s var(--ease) both; animation-delay: calc(var(--i, 0) * 55ms); }
+  @keyframes stIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  /* Pixel-extrude hover on headings */
+  .hx { transition: transform 0.25s var(--ease), text-shadow 0.25s var(--ease); }
+  .hx:hover, .qa:hover .hx, .card:hover .card-head .hx { transform: translate(-2px, -2px); text-shadow: 2px 2px 0 rgba(255, 201, 107, 0.5), 4px 4px 0 rgba(157, 183, 255, 0.2); }
+
+  /* Brand mark shimmer */
+  .brand:hover .brand-mark span { animation: pix 0.9s steps(1) infinite; }
+  .brand:hover .brand-mark span:nth-child(odd) { animation-delay: 0.3s; }
+  .brand:hover .brand-mark span:nth-child(3n) { animation-delay: 0.6s; }
+  @keyframes pix { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+  /* Button icon nudges */
+  .btn i { transition: transform 0.25s var(--ease); }
+  .btn:hover .ph-arrow-down-right { transform: translate(2px, 2px); }
+  .btn:hover .ph-arrow-right { transform: translateX(3px); }
+  .btn:hover .ph-microphone, .btn:hover .ph-plus { transform: scale(1.15); }
+  .btn:hover .ph-paper-plane-right { transform: translate(2px, -2px); }
+  .nav-links a { position: relative; }
+  .nav-links a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 2px; background: var(--lamp); transform: scaleX(0); transform-origin: right; transition: transform 0.35s var(--ease); }
+  .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
 
   /* ---------- Tracker app ---------- */
   .tracker { padding: clamp(72px, 10vw, 128px) 0 96px; }
@@ -141,7 +189,10 @@
   .tab i { font-size: 20px; }
   .tab:hover { color: var(--text); background: rgba(157, 183, 255, 0.04); }
   .tab[aria-selected="true"] { color: var(--text); background: rgba(157, 183, 255, 0.06); }
-  .tab[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--lamp); }
+  .tabs { position: relative; }
+  .tab-ink { position: absolute; bottom: 0; left: 0; height: 3px; width: 0; background: var(--lamp); transition: transform 0.45s var(--ease), width 0.45s var(--ease); pointer-events: none; }
+  .tab i { transition: transform 0.3s var(--ease); }
+  .tab:hover i { transform: translateY(-2px) rotate(-8deg); }
   .tab .count { font-family: var(--sans); font-size: 12px; font-weight: 600; padding: 1px 7px; background: var(--surface-2); color: var(--muted); }
   .panel { padding: clamp(20px, 3vw, 40px); }
   .panel[hidden] { display: none; }
@@ -151,11 +202,17 @@
   .panel-title small { font-family: var(--sans); font-size: 13px; color: var(--dim); font-weight: 500; }
 
   /* Stats */
+  .stat .stat-label i { transition: transform 0.35s var(--ease), color 0.2s; }
+  .stat:hover .stat-num { transform: translateX(5px); }
+  .stat:hover .stat-label i { transform: scale(1.2) rotate(-8deg); color: var(--lamp); }
+  .stat.lamp:hover .stat-label i { color: var(--lamp-ink); }
+  .stat::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.06) 50%, transparent 70%); transform: translateX(-100%); transition: transform 0.8s var(--ease); pointer-events: none; }
+  .stat:hover::after { transform: translateX(100%); }
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 40px; }
   .stat { background: var(--surface); padding: 26px 24px 22px; position: relative; overflow: hidden; min-height: 168px; display: flex; flex-direction: column; justify-content: space-between; }
   .stat-label { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; font-weight: 500; }
   .stat-label i { font-size: 18px; color: var(--moon); }
-  .stat-num { font-family: var(--pixel); font-size: clamp(48px, 5vw, 68px); line-height: 1; font-weight: 600; }
+  .stat-num { transition: transform 0.35s var(--ease); font-family: var(--pixel); font-size: clamp(48px, 5vw, 68px); line-height: 1; font-weight: 600; }
   .stat-foot { font-size: 13px; color: var(--dim); margin-top: 6px; }
   .stat.tint { background: radial-gradient(120% 90% at 100% 0%, rgba(157, 183, 255, 0.16), transparent 60%), var(--surface); }
   .stat.grid-bg { background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 16px 16px; background-color: var(--surface); }
@@ -169,7 +226,9 @@
   .table th { text-align: left; font-weight: 600; font-size: 13px; color: var(--dim); padding: 0 16px 12px; border-bottom: 1px solid var(--line-strong); white-space: nowrap; }
   .table td { padding: 18px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
   .table tbody tr { transition: background 0.2s; }
-  .table tbody tr:hover { background: rgba(157, 183, 255, 0.035); }
+  .table tbody tr:hover { background: rgba(157, 183, 255, 0.035); box-shadow: inset 3px 0 0 var(--lamp); }
+  .table .prog-name { transition: transform 0.25s var(--ease), color 0.2s; }
+  .table tbody tr:hover .prog-name { transform: translateX(4px); color: var(--lamp); }
   .table tbody tr:last-child td { border-bottom: 0; }
   .prog-name { font-weight: 600; color: var(--text); }
   .prog-org { font-size: 13px; color: var(--dim); margin-top: 2px; }
@@ -219,7 +278,8 @@
   /* Applications */
   .apps { display: grid; gap: 12px; }
   .app-row { display: grid; grid-template-columns: minmax(200px, 1.3fr) 2fr auto; gap: 24px; align-items: center; padding: 20px 22px; border: 1px solid var(--line); background: var(--surface); transition: border-color 0.2s; }
-  .app-row:hover { border-color: var(--line-strong); }
+  .app-row { transition: border-color 0.2s, transform 0.3s var(--ease), box-shadow 0.3s var(--ease); }
+  .app-row:hover { border-color: var(--line-strong); transform: translateX(4px); box-shadow: -4px 0 0 var(--lamp); }
   .pipeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .step { display: flex; flex-direction: column; gap: 8px; font-size: 12px; font-weight: 600; color: var(--dim); }
   .step .bar { height: 10px; background: var(--surface-2); position: relative; overflow: hidden; }
@@ -242,7 +302,10 @@
 
   /* Interview prep */
   .qa-grid { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 40px; }
-  .qa { background: var(--surface); padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .qa { background: var(--surface); padding: 24px; display: flex; flex-direction: column; gap: 14px; transition: background-color 0.3s; }
+  .qa:hover { background-color: #0e1630; }
+  .qa .tip i { transition: transform 0.4s var(--ease); }
+  .qa:hover .tip i { transform: rotate(-14deg) scale(1.2); }
   .qa:first-child { grid-row: span 2; background: radial-gradient(140% 70% at 0% 100%, rgba(255, 201, 107, 0.1), transparent 60%), var(--surface); }
   .qa:first-child h4 { font-size: 26px; }
   .qa-q { display: flex; gap: 10px; align-items: flex-start; }
@@ -260,6 +323,7 @@
   .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
   .card-head h3 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
   .card-head h3 i { color: var(--moon); font-size: 22px; }
+  .hx { display: inline-block; }
   .card-head .progress { font-size: 13px; color: var(--dim); font-weight: 600; }
 
   /* Chat */
@@ -346,7 +410,9 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
     .reveal { opacity: 1; transform: none; }
-    .hero [data-stagger] { opacity: 1; transform: none; }
+    .hero [data-stagger], .hero-ctas .btn { opacity: 1; transform: none; filter: none; }
+    .hero video { transform: none; filter: none; }
+    .motes { display: none; }
   }
 </style>
 </head>
@@ -370,16 +436,21 @@
 
 <main id="top">
   <section class="hero" aria-label="Introduction">
-    <video id="heroVideo" src="hero.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+    <div class="hero-media" id="heroMedia"><video id="heroVideo" src="hero.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video></div>
+    <div class="motes" id="motes" aria-hidden="true"></div>
     <div class="scan" aria-hidden="true"></div>
     <div class="wrap hero-content">
-      <h1 data-stagger="1">Late-night science, <em>off the usual path.</em></h1>
+      <h1 class="type typing" id="heroType" aria-label="Late-night science, off the usual path.">
+        <span class="type-ghost" aria-hidden="true">Late-night science, <em>off the usual path.</em><span class="caret"></span></span>
+        <span class="type-live" aria-hidden="true"><span id="typeA"></span><em id="typeB"></em><span class="caret"></span></span>
+      </h1>
       <p class="hero-sub" data-stagger="2">Track genomics, mycology, clinical research and health-data internships across the UK, then rehearse the interview out loud.</p>
-      <div class="hero-ctas" data-stagger="3">
+      <div class="hero-ctas">
         <a href="#tracker" class="btn btn-primary">Open tracker <i class="ph ph-arrow-down-right"></i></a>
         <a href="#tracker" class="btn btn-ghost" data-go="prep"><i class="ph ph-microphone"></i> Practise interviews</a>
       </div>
     </div>
+    <a href="#tracker" class="scroll-cue" aria-label="Scroll to tracker"><span></span><span></span><span></span></a>
   </section>
 
   <div class="strip" aria-label="Fields covered">
@@ -389,7 +460,7 @@
   <section class="tracker" id="tracker">
     <div class="wrap">
       <div class="tracker-head reveal">
-        <h2>Everything in one quiet window.</h2>
+        <h2 class="hx" data-scramble>Everything in one quiet window.</h2>
         <p>Programs, deadlines, your pipeline and interview practice. Your progress saves in this browser.</p>
       </div>
 
@@ -398,13 +469,14 @@
           <button class="tab" role="tab" id="tab-dashboard" aria-controls="panel-dashboard" aria-selected="true" data-tab="dashboard"><i class="ph ph-squares-four"></i> Dashboard</button>
           <button class="tab" role="tab" id="tab-internships" aria-controls="panel-internships" aria-selected="false" data-tab="internships" tabindex="-1"><i class="ph ph-flask"></i> Internships <span class="count" id="countPrograms">8</span></button>
           <button class="tab" role="tab" id="tab-applications" aria-controls="panel-applications" aria-selected="false" data-tab="applications" tabindex="-1"><i class="ph ph-paper-plane-tilt"></i> Applications <span class="count" id="countApps">0</span></button>
+          <span class="tab-ink" id="tabInk" aria-hidden="true"></span>
           <button class="tab" role="tab" id="tab-prep" aria-controls="panel-prep" aria-selected="false" data-tab="prep" tabindex="-1"><i class="ph ph-microphone-stage"></i> Interview prep</button>
         </div>
 
         <!-- DASHBOARD -->
         <div class="panel" role="tabpanel" id="panel-dashboard" aria-labelledby="tab-dashboard">
           <div class="stats" id="stats"></div>
-          <h3 class="panel-title">Upcoming deadlines <small>Next application cycle</small></h3>
+          <h3 class="panel-title"><span class="hx" data-scramble>Upcoming deadlines</span> <small>Next application cycle</small></h3>
           <table class="table">
             <thead><tr><th>Program</th><th>Focus</th><th>Pay</th><th>Deadline</th><th>Your status</th></tr></thead>
             <tbody id="deadlineRows"></tbody>
@@ -434,7 +506,7 @@
 
         <!-- APPLICATIONS -->
         <div class="panel" role="tabpanel" id="panel-applications" aria-labelledby="tab-applications" hidden>
-          <h3 class="panel-title">Your pipeline <small>Click a status to move it forward</small></h3>
+          <h3 class="panel-title"><span class="hx" data-scramble>Your pipeline</span> <small>Click a status to move it forward</small></h3>
           <div class="apps" id="appRows"></div>
           <div class="empty" id="appEmpty" hidden>
             <h4>Nothing tracked yet</h4>
@@ -457,7 +529,7 @@
             <!-- Coach -->
             <div class="card">
               <div class="card-head">
-                <h3><i class="ph ph-chats-circle"></i> Practice coach</h3>
+                <h3><i class="ph ph-chats-circle"></i> <span class="hx">Practice coach</span></h3>
                 <span class="progress" id="coachProgress">Question 1 of 5</span>
               </div>
               <div class="chat-log" id="chatLog" aria-live="polite"></div>
@@ -473,7 +545,7 @@
             <!-- AI mock interview -->
             <div class="card">
               <div class="card-head">
-                <h3><i class="ph ph-user-sound"></i> AI mock interview</h3>
+                <h3><i class="ph ph-user-sound"></i> <span class="hx">AI mock interview</span></h3>
                 <span class="progress" id="mockProgress">5 questions</span>
               </div>
               <div class="voice-body">
@@ -573,6 +645,8 @@
   const KEYWORDS = ["lab", "technique", "project", "experiment", "data", "method", "result", "results", "supervisor", "sequencing", "pcr", "qpcr", "culture", "analysis", "assay", "microscopy", "python", "paper", "research", "sample", "protocol", "hypothesis", "genome", "genomics", "fungi", "fungal", "mycology", "clinical", "patient", "patients", "learned", "learnt", "because", "trial", "cells", "protein", "dna", "rna", "statistics", "western", "gel", "crispr", "pipeline", "dataset", "phd"];
 
   /* ================= STATE ================= */
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let statsSeen = false, prevStats = [];
   const STORE = "fringescience.v1";
   const defaultState = { apps: [ { id: "sanger", s: "prep" }, { id: "wellcome", s: "submitted" }, { id: "crick", s: "interview" }, { id: "hdruk", s: "prep" } ] };
   let state = load();
@@ -604,6 +678,7 @@
       else panel.hidden = true;
     });
     if (name !== "prep" && typeof mock !== "undefined") mock.leave();
+    onTabShown(name);
   }
   tabs.forEach((t, i) => {
     t.addEventListener("click", () => selectTab(t.dataset.tab));
@@ -634,6 +709,7 @@
         <div><div class="stat-num" data-n="${c.n}">${c.n}</div><div class="stat-foot">${c.foot}</div></div>
       </div>`).join("");
     $("#countApps").textContent = tracked;
+    countStats();
   }
   function statusCell(id) {
     const a = appFor(id);
@@ -730,7 +806,7 @@
   /* ================= Q&A CARDS ================= */
   $("#qaGrid").innerHTML = QA.map((c, i) => `
     <article class="qa">
-      <div class="qa-q"><span>Q${i + 1}</span><h4>${c.q}</h4></div>
+      <div class="qa-q"><span>Q${i + 1}</span><h4 class="hx">${c.q}</h4></div>
       <p>${c.a}</p>
       <div class="tip"><i class="ph ph-lightbulb-filament"></i><span>${c.tip}</span></div>
     </article>`).join("");
@@ -1123,17 +1199,138 @@
   });
   addEventListener("pagehide", () => { if (voice.active) voice.stop(); tts.cancel(); });
 
+
+  /* ================= MOTION ================= */
+
+  // Count stat numbers up from their previous value.
+  function countStats() {
+    document.querySelectorAll("#stats .stat-num").forEach((el, i) => {
+      const to = +el.dataset.n, from = statsSeen ? (prevStats[i] ?? to) : 0;
+      prevStats[i] = to;
+      if (!statsSeen) { el.textContent = 0; return; }
+      if (reduceMotion || from === to) { el.textContent = to; return; }
+      const t0 = performance.now(), dur = 700;
+      const step = now => {
+        const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+        el.textContent = Math.round(from + (to - from) * e);
+        if (k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+  }
+  function revealStats() { statsSeen = true; prevStats = prevStats.map(() => 0); countStats(); }
+
+  // Staggered entrance for list-like children.
+  const GROUPS = { dashboard: ["#stats", "#deadlineRows"], internships: ["#programRows"], applications: ["#appRows"], prep: ["#qaGrid", ".practice"] };
+  function staggerIn(name) {
+    if (reduceMotion) return;
+    (GROUPS[name] || []).forEach(sel => {
+      const g = document.querySelector(sel); if (!g) return;
+      [...g.children].forEach((c, i) => { c.style.setProperty("--i", i); c.classList.remove("st-in"); void c.offsetWidth; c.classList.add("st-in"); });
+    });
+  }
+
+  // Pixel "decode" effect for headings.
+  const GLYPHS = "▖▗▘▙▚▛▜▝▞▟#%&*+=<>/";
+  function scramble(el) {
+    if (reduceMotion || el.dataset.busy) return;
+    const final = el.dataset.text || (el.dataset.text = el.textContent);
+    el.dataset.busy = 1;
+    const t0 = performance.now(), dur = 650;
+    const frame = now => {
+      const k = Math.min(1, (now - t0) / dur), done = Math.floor(final.length * k);
+      el.textContent = final.slice(0, done) + final.slice(done).replace(/\S/g, () => GLYPHS[Math.random() * GLYPHS.length | 0]);
+      if (k < 1) requestAnimationFrame(frame); else { el.textContent = final; delete el.dataset.busy; }
+    };
+    requestAnimationFrame(frame);
+  }
+
+  // Sliding tab indicator.
+  const ink = $("#tabInk");
+  function moveInk() {
+    const t = document.querySelector('.tab[aria-selected="true"]'); if (!t) return;
+    ink.style.width = t.offsetWidth + "px";
+    ink.style.transform = `translateX(${t.offsetLeft}px)`;
+  }
+  addEventListener("resize", moveInk);
+  document.fonts && document.fonts.ready.then(moveInk);
+  moveInk();
+
+  function onTabShown(name) {
+    moveInk();
+    staggerIn(name);
+    document.querySelectorAll(`#panel-${name} [data-scramble]`).forEach(scramble);
+    if (name === "dashboard") { prevStats = prevStats.map(() => 0); countStats(); }
+  }
+
+  // Hero typing.
+  const heroType = $("#heroType"), hero = $(".hero");
+  const PART_A = "Late-night science, ", PART_B = "off the usual path.";
+  function finishTyping() { heroType.classList.remove("typing"); hero.classList.add("typed"); }
+  if (reduceMotion) { $("#typeA").textContent = PART_A; $("#typeB").textContent = PART_B; finishTyping(); }
+  else {
+    const full = PART_A + PART_B; let n = 0;
+    const typeNext = () => {
+      n++;
+      $("#typeA").textContent = full.slice(0, Math.min(n, PART_A.length));
+      $("#typeB").textContent = n > PART_A.length ? full.slice(PART_A.length, n) : "";
+      if (n >= full.length) return setTimeout(finishTyping, 250);
+      const ch = full[n - 1];
+      setTimeout(typeNext, ch === "," ? 380 : ch === " " ? 90 : 45 + Math.random() * 55);
+    };
+    setTimeout(typeNext, 900);
+  }
+
+  // Floating pixel motes.
+  if (!reduceMotion) {
+    const motes = $("#motes");
+    for (let i = 0; i < 18; i++) {
+      const m = document.createElement("span");
+      const size = [2, 3, 4][i % 3];
+      m.className = "mote" + (i % 5 === 0 ? " warm" : "");
+      m.style.cssText = `left:${Math.random() * 100}%;width:${size}px;height:${size}px;--o:${(0.25 + Math.random() * 0.45).toFixed(2)};--dx:${(Math.random() * 80 - 40).toFixed(0)}px;animation-duration:${(10 + Math.random() * 14).toFixed(1)}s;animation-delay:${(-Math.random() * 20).toFixed(1)}s`;
+      motes.appendChild(m);
+    }
+  }
+
+  // Hero parallax: scroll + pointer.
+  const heroMedia = $("#heroMedia"), heroContent = $(".hero-content");
+  let mx = 0, my = 0, tx = 0, ty = 0, raf = 0;
+  function paintHero() {
+    raf = 0;
+    tx += (mx - tx) * 0.08; ty += (my - ty) * 0.08;
+    const y = Math.min(scrollY, innerHeight);
+    heroMedia.style.transform = `translate3d(${tx * -14}px, ${y * 0.3 + ty * -10}px, 0)`;
+    heroContent.style.transform = `translate3d(0, ${y * -0.15}px, 0)`;
+    heroContent.style.opacity = Math.max(0, 1 - y / (innerHeight * 0.75));
+    if (Math.abs(mx - tx) > 0.001 || Math.abs(my - ty) > 0.001) raf = requestAnimationFrame(paintHero);
+  }
+  const kick = () => { if (!raf) raf = requestAnimationFrame(paintHero); };
+  if (!reduceMotion) {
+    addEventListener("scroll", () => { if (scrollY < innerHeight * 1.2) kick(); }, { passive: true });
+    if (matchMedia("(pointer: fine)").matches) hero.addEventListener("pointermove", e => {
+      mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; kick();
+    });
+  }
+
   /* ================= NAV + REVEAL + VIDEO ================= */
   const nav = $("#nav");
   const onScroll = () => nav.classList.toggle("scrolled", scrollY > 40);
   addEventListener("scroll", onScroll, { passive: true }); onScroll();
 
-  const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { threshold: 0.12 });
+  const io = new IntersectionObserver(es => es.forEach(en => {
+    if (!en.isIntersecting) return;
+    en.target.classList.add("in"); io.unobserve(en.target);
+    en.target.querySelectorAll("[data-scramble]").forEach(scramble);
+    if (en.target.id === "app") { const cur = document.querySelector('.tab[aria-selected="true"]').dataset.tab; staggerIn(cur); setTimeout(revealStats, 250); moveInk(); }
+  }), { threshold: 0.12 });
   document.querySelectorAll(".reveal").forEach(el => io.observe(el));
 
   // Pause the hero loop when it's off screen to save battery.
   const hv = $("#heroVideo");
-  new IntersectionObserver(([en]) => { en.isIntersecting ? hv.play().catch(() => {}) : hv.pause(); }).observe(hv);
+  let heroOnScreen = true;
+  new IntersectionObserver(([en]) => { heroOnScreen = en.isIntersecting; heroOnScreen ? hv.play().catch(() => {}) : hv.pause(); }).observe(hv);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && heroOnScreen) hv.play().catch(() => {}); });
 })();
 </script>
 </body>
